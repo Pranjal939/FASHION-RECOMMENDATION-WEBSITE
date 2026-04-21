@@ -1,0 +1,81 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Return Requests{% endblock %}
+{% block page_title %}Return & Refund Requests{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div style="padding:12px; background:#d4edda; color:#155724; border-radius:8px; margin-bottom:16px;">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+{% if return_list %}
+<div style="overflow-x:auto;">
+<table style="width:100%; border-collapse:collapse; background:white; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+  <thead>
+    <tr style="background:#172b6b; color:white;">
+      <th style="padding:14px 16px; text-align:left;">Order #</th>
+      <th style="padding:14px 16px; text-align:left;">Customer</th>
+      <th style="padding:14px 16px; text-align:left;">Amount</th>
+      <th style="padding:14px 16px; text-align:left;">Payment</th>
+      <th style="padding:14px 16px; text-align:left;">Reason</th>
+      <th style="padding:14px 16px; text-align:left;">Requested</th>
+      <th style="padding:14px 16px; text-align:left;">Refund Status</th>
+      <th style="padding:14px 16px; text-align:left;">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ret in return_list %}
+    <tr style="border-bottom:1px solid #f0f0f0;">
+      <td style="padding:12px 16px; font-weight:600; color:#172b6b;">#{{ ret.order_id }}</td>
+      <td style="padding:12px 16px;">{{ ret.username }}</td>
+      <td style="padding:12px 16px;">₹{{ ret.total_amount }}</td>
+      <td style="padding:12px 16px;">{{ ret.payment_method }}</td>
+      <td style="padding:12px 16px; max-width:200px; font-size:13px; color:#555;">{{ ret.reason }}</td>
+      <td style="padding:12px 16px; font-size:13px; color:#888;">{{ ret.requested_at.strftime('%d %b %Y') }}</td>
+      <td style="padding:12px 16px;">
+        {% if ret.refund_status == 'Approved' %}
+          <span style="background:#d4edda; color:#155724; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Approved</span>
+        {% elif ret.refund_status == 'Rejected' %}
+          <span style="background:#f8d7da; color:#721c24; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Rejected</span>
+        {% else %}
+          <span style="background:#fff3cd; color:#856404; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">Pending</span>
+        {% endif %}
+      </td>
+      <td style="padding:12px 16px;">
+        {% if ret.refund_status == 'Pending' %}
+        <form method="POST" action="{{ url_for('admin_update_return', return_id=ret.id) }}" style="display:flex; flex-direction:column; gap:6px; min-width:200px;">
+          <input type="text" name="admin_note" placeholder="Note to customer (optional)"
+                 style="padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:12px;">
+          <div style="display:flex; gap:6px;">
+            <button type="submit" name="refund_status" value="Approved"
+                    style="flex:1; padding:6px; background:#28a745; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;">
+              Approve
+            </button>
+            <button type="submit" name="refund_status" value="Rejected"
+                    style="flex:1; padding:6px; background:#dc3545; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;">
+              Reject
+            </button>
+          </div>
+        </form>
+        {% else %}
+          <span style="font-size:12px; color:#888;">{{ ret.admin_note or '—' }}</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% else %}
+<div style="text-align:center; padding:60px; background:white; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+  <div style="font-size:48px; margin-bottom:16px;">📦</div>
+  <h3 style="color:#172b6b;">No return requests yet</h3>
+</div>
+{% endif %}
+
+{% endblock %}

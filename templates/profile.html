@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Trendify</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .profile-wrapper {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    .profile-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin-bottom: 24px;
+    }
+    .profile-card h3 {
+      color: #0a2a66;
+      font-size: 18px;
+      margin: 0 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #0a2a66;
+    }
+    .form-group input[readonly] {
+      background: #f8f9fa;
+      color: #888;
+      cursor: not-allowed;
+    }
+    .save-btn {
+      padding: 10px 28px;
+      background: #0a2a66;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .save-btn:hover { background: #172b6b; }
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert-danger  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row span:first-child { color: #666; font-weight: 500; }
+    .info-row span:last-child  { color: #333; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}"
+         alt="Trendify Fashion" style="height: 50px; cursor: pointer;">
+  </a>
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+    <span class="welcome">Welcome {{ session.get("username") }}</span>
+    <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    <form action="{{ url_for('search') }}" method="GET" style="display:flex; align-items:center; margin-left:10px;">
+      <input type="text" name="q" placeholder="Search products..."
+             style="padding:6px 12px; border:2px solid #ddd; border-radius:20px 0 0 20px; outline:none; font-size:13px; width:180px;">
+      <button type="submit" style="padding:6px 12px; background:#172b6b; color:white; border:none; border-radius:0 20px 20px 0; cursor:pointer; font-size:13px;">🔍</button>
+    </form>
+  </nav>
+</header>
+
+<div class="profile-wrapper">
+
+  <h2 style="color:#0a2a66; margin-bottom:24px;">My Profile</h2>
+
+  <a href="{{ url_for('my_orders') }}" style="display:inline-block; margin-bottom:20px; padding:10px 20px; background:#0a2a66; color:white; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px;">📦 View My Orders</a>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Account Info (read-only) -->
+  <div class="profile-card">
+    <h3>Account Information</h3>
+    <div class="info-row"><span>Email</span><span>{{ user.email }}</span></div>
+    <div class="info-row"><span>Gender</span><span>{{ user.gender or '—' }}</span></div>
+    <div class="info-row"><span>Age</span><span>{{ user.age or '—' }}</span></div>
+    <div class="info-row"><span>Member Since</span><span>{{ user.created_at.strftime('%d %b %Y') }}</span></div>
+  </div>
+
+  <!-- Update Name & Phone -->
+  <div class="profile-card">
+    <h3>Update Profile</h3>
+    <form method="POST" action="{{ url_for('profile') }}">
+      <input type="hidden" name="action" value="update_info">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="username" value="{{ user.username }}" required
+               minlength="2" maxlength="20" placeholder="e.g. Pranjal"
+               title="2–20 characters, letters and spaces only">
+        <span style="font-size:12px; color:#888;">2–20 characters, letters only</span>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" name="phone" id="phoneInput" value="{{ user.phone }}"
+               required maxlength="10" placeholder="10-digit phone number">
+      </div>
+      <button type="submit" class="save-btn">Save Changes</button>
+    </form>
+  </div>
+
+  <!-- Change Password -->
+  <div class="profile-card">
+    <h3>Change Password</h3>
+    <form method="POST" action="{{ url_for('profile') }}">
+      <input type="hidden" name="action" value="change_password">
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" name="current_password" required placeholder="Enter current password">
+        <a href="{{ url_for('forgot_password', next='profile') }}" style="font-size:12px; color:#0a2a66; text-decoration:none; display:inline-block; margin-top:4px;">Forgot your password?</a>
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" name="new_password" id="newPw" required minlength="6" placeholder="Min 6 characters">
+      </div>
+      <div class="form-group">
+        <label>Confirm New Password</label>
+        <input type="password" name="confirm_password" id="confirmPw" required placeholder="Repeat new password">
+        <span id="pwMatchError" style="color:#dc3545; font-size:12px; display:none;">Passwords do not match</span>
+      </div>
+      <button type="submit" class="save-btn">Change Password</button>
+    </form>
+  </div>
+
+</div>
+
+<footer class="main-footer">
+  <div class="footer-container">
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color:inherit; text-decoration:none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color:inherit; text-decoration:none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color:inherit; text-decoration:none;">Careers</a></p>
+      <p><a href="{{ url_for('feedback') }}" style="color:inherit; text-decoration:none;">Feedback</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color:inherit; text-decoration:none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color:inherit; text-decoration:none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color:inherit; text-decoration:none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color:inherit; text-decoration:none;">FAQ</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color:inherit; text-decoration:none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color:inherit; text-decoration:none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color:inherit; text-decoration:none;">Security</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p><a href="mailto:support@trendify.com" style="color:inherit; text-decoration:none;">Email: support@trendify.com</a></p>
+      <p><a href="tel:+919313665646" style="color:inherit; text-decoration:none;">Phone: +91 9313665646</a></p>
+      <p>India</p>
+    </div>
+  </div>
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+<script>
+  // Phone - digits only
+  document.getElementById('phoneInput').addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+  });
+
+  // Password match check
+  document.getElementById('confirmPw').addEventListener('input', function() {
+    const match = this.value === document.getElementById('newPw').value;
+    document.getElementById('pwMatchError').style.display = match ? 'none' : 'block';
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return and Refund Policy - Trendify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get('username') %}
+      <span class="welcome">Hi, {{ session.get('username') }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+<!-- CONTENT -->
+<div style="max-width: 900px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <h1 style="color: #172b6b; margin-bottom: 10px;">Return and Refund Policy – Trendify</h1>
+    <p style="color: #666; margin-bottom: 30px;"><strong>Last Updated:</strong> 10 March 2026</p>
+
+    <p style="margin-bottom: 20px;">Customer satisfaction is important to Trendify.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">1. Return Eligibility</h2>
+    <p style="margin-bottom: 10px;">Products may be returned if:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>The item is damaged</li>
+        <li>The item is defective</li>
+        <li>The wrong product was delivered</li>
+    </ul>
+    <p style="margin-bottom: 20px;"><strong>Return requests must be made within 7 days of receiving the product.</strong></p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">2. Return Conditions</h2>
+    <p style="margin-bottom: 10px;">To qualify for a return:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>The product must be unused</li>
+        <li>The product must be in original packaging</li>
+        <li>The customer must provide proof of purchase</li>
+    </ul>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">3. Refund Process</h2>
+    <p style="margin-bottom: 10px;">Once the returned item is received and inspected:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>Refunds will be processed within 5–10 business days</li>
+        <li>Refunds will be issued to the original payment method</li>
+    </ul>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">4. Non-Returnable Items</h2>
+    <p style="margin-bottom: 10px;">Certain items may not be eligible for return, such as:</p>
+    <ul style="margin-left: 30px; margin-bottom: 30px;">
+        <li>Used items</li>
+        <li>Personalized products</li>
+        <li>Final sale items</li>
+    </ul>
+
+    <hr style="border: none; border-top: 2px solid #e0e0e0; margin: 40px 0;">
+
+    <h1 style="color: #172b6b; margin-bottom: 20px;">Disclaimer – Trendify</h1>
+    <p style="margin-bottom: 20px;">The information on Trendify is provided for general informational purposes only.</p>
+    <ul style="margin-left: 30px; margin-bottom: 30px;">
+        <li>We make every effort to ensure accuracy, but we do not guarantee that all information is complete or error-free.</li>
+        <li>Product images may slightly differ from the actual product.</li>
+        <li>Trendify is not responsible for losses resulting from reliance on website information.</li>
+    </ul>
+
+    <a href="{{ url_for('home') }}" style="display: inline-block; padding: 12px 25px; background: #172b6b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">← Back to Home</a>
+</div>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+  <div class="footer-container">
+
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p><a href="mailto:support@trendify.com" style="color: inherit; text-decoration: none;">Email: support@trendify.com</a></p>
+      <p><a href="tel:+919313665646" style="color: inherit; text-decoration: none;">Phone: +91 9313665646</a></p>
+      <p>India</p>
+    </div>
+
+  </div>
+
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>

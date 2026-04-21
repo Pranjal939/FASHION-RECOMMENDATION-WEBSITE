@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Trendify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get('username') %}
+      <span class="welcome">Hi, {{ session.get('username') }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+<!-- CONTENT -->
+<div style="max-width: 900px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <h1 style="color: #172b6b; margin-bottom: 10px;">Privacy Policy – Trendify</h1>
+    <p style="color: #666; margin-bottom: 30px;"><strong>Last Updated:</strong> 10 March 2026</p>
+
+    <p style="margin-bottom: 20px;">Trendify values your privacy and aims to protect your personal information.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">1. Information We Collect</h2>
+    <p style="margin-bottom: 10px;">We may collect the following types of information:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>Personal details (name, email, phone number)</li>
+        <li>Shipping and billing address</li>
+        <li>Payment information</li>
+        <li>Account login details</li>
+        <li>Website usage information</li>
+        <li>Device and browser information</li>
+    </ul>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">2. How We Use Your Information</h2>
+    <p style="margin-bottom: 10px;">Your information may be used to:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>Process orders and payments</li>
+        <li>Deliver purchased products</li>
+        <li>Improve website functionality</li>
+        <li>Respond to customer inquiries</li>
+        <li>Send updates, offers, or newsletters</li>
+        <li>Prevent fraud and maintain security</li>
+    </ul>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">3. Cookies and Tracking Technologies</h2>
+    <p style="margin-bottom: 10px;">Trendify may use cookies to improve user experience. Cookies help us:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>Understand website traffic</li>
+        <li>Remember user preferences</li>
+        <li>Improve website performance</li>
+    </ul>
+    <p style="margin-bottom: 20px;">Users can disable cookies in browser settings.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">4. Data Protection</h2>
+    <p style="margin-bottom: 20px;">Trendify uses appropriate technical and organizational security measures to protect personal information from unauthorized access, misuse, or disclosure.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">5. Sharing Information</h2>
+    <p style="margin-bottom: 10px;">We do not sell or rent your personal information. However, we may share data with:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>Payment processors</li>
+        <li>Delivery partners</li>
+        <li>Website analytics providers</li>
+    </ul>
+    <p style="margin-bottom: 20px;">These services only use data necessary to perform their tasks.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">6. User Rights</h2>
+    <p style="margin-bottom: 10px;">Users have the right to:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>Access their personal data</li>
+        <li>Request corrections</li>
+        <li>Request deletion of their data</li>
+    </ul>
+    <p style="margin-bottom: 20px;">Requests can be made through our contact email.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">7. Updates to Privacy Policy</h2>
+    <p style="margin-bottom: 30px;">Trendify may modify this Privacy Policy from time to time. Updated policies will appear on this page.</p>
+
+    <a href="{{ url_for('home') }}" style="display: inline-block; padding: 12px 25px; background: #172b6b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">← Back to Home</a>
+</div>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+  <div class="footer-container">
+
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p><a href="mailto:support@trendify.com" style="color: inherit; text-decoration: none;">Email: support@trendify.com</a></p>
+      <p><a href="tel:+919313665646" style="color: inherit; text-decoration: none;">Phone: +91 9313665646</a></p>
+      <p>India</p>
+    </div>
+
+  </div>
+
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>

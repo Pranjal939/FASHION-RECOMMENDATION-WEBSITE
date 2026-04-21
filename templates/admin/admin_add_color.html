@@ -1,0 +1,104 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Add Color{% endblock %}
+{% block page_title %}Add New Product Color{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #172b6b;
+        font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .submit-btn {
+        background: #28a745;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .submit-btn:hover {
+        background: #218838;
+    }
+
+    .cancel-btn {
+        background: #6c757d;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .cancel-btn:hover {
+        background: #5a6268;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+    <form method="POST">
+        <div class="form-group">
+            <label>Product</label>
+            <select name="product_id" required>
+                <option value="">Select Product</option>
+                {% for product in products %}
+                <option value="{{ product.id }}">{{ product.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Color Name</label>
+            <input type="text" name="color" placeholder="e.g., Blue, Red, Green" required>
+        </div>
+
+        <div class="form-group">
+            <label>Color Image Filename</label>
+            <input type="text" name="color_image" placeholder="e.g., blue_shirt.jpg" required>
+            <small style="color: #666;">Upload image to static/images/ folder first</small>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="submit-btn">Add Color</button>
+            <a href="{{ url_for('admin_colors') }}" class="cancel-btn">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

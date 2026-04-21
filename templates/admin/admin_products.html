@@ -1,0 +1,132 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Products{% endblock %}
+{% block page_title %}Manage Products{% endblock %}
+
+{% block extra_css %}
+<style>
+    .add-btn {
+        background: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .add-btn:hover {
+        background: #218838;
+    }
+
+    .products-table {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #172b6b;
+        color: white;
+        padding: 15px;
+        text-align: left;
+    }
+
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    tr:hover {
+        background: #f9f9f9;
+    }
+
+    .product-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .action-btns a {
+        padding: 6px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-right: 5px;
+        font-size: 14px;
+        display: inline-block;
+    }
+
+    .edit-btn {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .delete-btn {
+        background: #dc3545;
+        color: white;
+    }
+
+    .edit-btn:hover {
+        background: #e0a800;
+    }
+
+    .delete-btn:hover {
+        background: #c82333;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('admin_add_product') }}" class="add-btn">➕ Add New Product</a>
+
+<div class="products-table">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>
+                    <img src="{{ url_for('static', filename='images/' + product.image) }}" 
+                         class="product-img" alt="{{ product.name }}">
+                </td>
+                <td>{{ product.name }}</td>
+                <td>₹{{ product.price }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>
+                    {% if product.category_id == 1 %}Trending
+                    {% elif product.category_id == 2 %}Occasion
+                    {% else %}Other{% endif %}
+                </td>
+                <td class="action-btns">
+                    <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="edit-btn">Edit</a>
+                    <a href="{{ url_for('admin_delete_product', product_id=product.id) }}" 
+                       class="delete-btn" 
+                       onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

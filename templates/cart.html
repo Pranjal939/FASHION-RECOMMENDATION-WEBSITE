@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Shopping Cart - Trendify Fashion">
+    <title>Cart | Trendify Fashion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        /* Cart Specific Responsive Styles */
+        .cart-container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+        
+        /* Prevent empty elements from showing */
+        div:empty {
+            display: none !important;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .cart-item-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .cart-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 20px;
+            border-radius: 8px;
+        }
+        
+        .cart-item-details h3 {
+            margin-bottom: 8px;
+            color: #172b6b;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            background: #172b6b;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .quantity-btn:hover {
+            background: #0f1f52;
+        }
+        
+        .quantity-btn.decrease {
+            background: #dc3545;
+        }
+        
+        .quantity-btn.decrease:hover {
+            background: #c82333;
+        }
+        
+        .quantity-display {
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .cart-total {
+            text-align: right;
+            margin-top: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .checkout-btn {
+            padding: 15px 30px;
+            background: #172b6b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .checkout-btn:hover {
+            background: #0f1f52;
+        }
+        
+        /* Mobile Cart Styles */
+        @media (max-width: 768px) {
+            .cart-container {
+                width: 95%;
+                margin: 20px auto;
+            }
+            
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .cart-item-content {
+                flex-direction: column;
+                margin-bottom: 15px;
+            }
+            
+            .cart-item img {
+                margin-right: 0;
+                margin-bottom: 15px;
+                width: 80px;
+                height: 80px;
+            }
+            
+            .quantity-controls {
+                justify-content: center;
+            }
+            
+            .cart-total {
+                text-align: center;
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .cart-item img {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .quantity-btn {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+            
+            .checkout-btn {
+                width: 100%;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get('username') %}
+      <span class="welcome">Hi, {{ session.get('username') }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+
+<!-- CART TITLE -->
+<h2 style="text-align:center; margin-top:30px;">🛒 Your Cart</h2>
+
+
+{% if cart_items %}
+
+<div class="cart-container">
+
+    {% for item in cart_items %}
+
+    <div class="cart-item">
+
+        <div class="cart-item-content">
+            <img src="{{ url_for('static', filename='images/' + item.image) }}" 
+                 alt="{{ item.name }}">
+
+            <div class="cart-item-details">
+                <h3>{{ item.name }}</h3>
+                {% if item.color %}
+                <p>Color: {{ item.color|title }}</p>
+                {% endif %}
+                {% if item.size %}
+                <p>Size: {{ item.size }}</p>
+                {% endif %}
+                <p>Price: ₹{{ item.price }}</p>
+                
+                <!-- QUANTITY CONTROLS -->
+                <div class="quantity-controls">
+                    <span>Quantity:</span>
+                    {% if item.get('cart_key') %}
+                    <a href="{{ url_for('decrease_quantity', cart_key=item.cart_key) }}" 
+                       class="quantity-btn decrease">-</a>
+                    {% elif item.get('color_id') and item.get('size') %}
+                    <a href="{{ url_for('decrease_quantity_db', product_id=item.id, color_id=item.color_id, size=item.size) }}" 
+                       class="quantity-btn decrease">-</a>
+                    {% else %}
+                    <a href="{{ url_for('decrease_quantity_db', product_id=item.id) }}" 
+                       class="quantity-btn decrease">-</a>
+                    {% endif %}
+                    
+                    <span class="quantity-display">{{ item.quantity }}</span>
+                    
+                    {% if item.get('cart_key') %}
+                    <a href="{{ url_for('increase_quantity', cart_key=item.cart_key) }}" 
+                       class="quantity-btn">+</a>
+                    {% elif item.get('color_id') and item.get('size') %}
+                    <a href="{{ url_for('increase_quantity_db', product_id=item.id, color_id=item.color_id, size=item.size) }}" 
+                       class="quantity-btn">+</a>
+                    {% else %}
+                    <a href="{{ url_for('increase_quantity_db', product_id=item.id) }}" 
+                       class="quantity-btn">+</a>
+                    {% endif %}
+                </div>
+                
+                <p><strong>Total: ₹{{ item.total }}</strong></p>
+            </div>
+        </div>
+
+        <!-- REMOVE BUTTON -->
+        <div>
+            {% if item.get('cart_key') %}
+            <a href="{{ url_for('remove_cart_item', cart_key=item.cart_key) }}"
+               style="background:red; color:white; padding:8px 15px; text-decoration:none; border-radius:5px;">
+               Remove
+            </a>
+            {% elif item.get('color_id') and item.get('size') %}
+            <a href="{{ url_for('remove_from_cart', product_id=item.id, color_id=item.color_id, size=item.size) }}"
+               style="background:red; color:white; padding:8px 15px; text-decoration:none; border-radius:5px;">
+               Remove
+            </a>
+            {% else %}
+            <a href="{{ url_for('remove_from_cart', product_id=item.id) }}"
+               style="background:red; color:white; padding:8px 15px; text-decoration:none; border-radius:5px;">
+               Remove
+            </a>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+    <!-- GRAND TOTAL -->
+    <div class="cart-total">
+        <h2>Grand Total: ₹{{ grand_total }}</h2>
+        <a href="{{ url_for('checkout') }}" class="checkout-btn">
+            Proceed to Checkout
+        </a>
+    </div>
+
+</div>
+
+{% else %}
+
+<h3 style="text-align:center; margin:50px 0;">Your cart is empty 🛒</h3>
+
+{% endif %}
+
+
+<!-- FOOTER -->
+<footer class="main-footer">
+  <div class="footer-container">
+
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+      <p><a href="{{ url_for('feedback') }}" style="color: inherit; text-decoration: none;">Feedback</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p>Email: support@trendify.com</p>
+      <p>Phone: +91 9313665646</p>
+      <p>India</p>
+    </div>
+
+  </div>
+
+  <p class="footer-bottom">
+    © 2026 Trendify Fashion | All Rights Reserved
+  </p>
+</footer>
+
+</body>
+</html>

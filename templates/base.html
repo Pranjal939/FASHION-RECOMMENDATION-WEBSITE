@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Trendify Fashion - Explore trending outfits, most selling products and occasion wear">
+  <meta name="keywords" content="fashion, clothing, trending, occasion wear, online shopping">
+  <title>Trendify Fashion - Your Style Destination</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style">
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <a href="{{ url_for('home') }}" style="text-decoration: none;">
+      <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+           alt="Trendify Fashion" 
+           style="height: 50px; cursor: pointer;">
+    </a>
+
+    <nav>
+      <a href="{{ url_for('trending') }}">Trending</a>
+      <a href="{{ url_for('occasion') }}">Occasion</a>
+      <a href="{{ url_for('mostselling') }}">Most Selling</a>
+      <a href="{{ url_for('cart') }}">Cart</a>
+
+      {% if session.get("user_id") %}
+        <a href="{{ url_for('profile') }}" style="font-weight:bold;">Welcome {{ session.get("username") }}</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+      {% endif %}
+
+      <form action="{{ url_for('search') }}" method="GET" style="display:flex; align-items:center; margin-left:10px;">
+        <input type="text" name="q" placeholder="Search products..." 
+               value="{{ request.args.get('q', '') }}"
+               style="padding:6px 12px; border:2px solid #ddd; border-radius:20px 0 0 20px; outline:none; font-size:13px; width:180px;">
+        <button type="submit" style="padding:6px 12px; background:#172b6b; color:white; border:none; border-radius:0 20px 20px 0; cursor:pointer; font-size:13px;">🔍</button>
+      </form>
+    </nav>
+  </header>
+
+
+  <!-- Banner -->
+  <section class="banner">
+    <div class="banner-text">
+      <h2>Trendify Fashion Store</h2>
+      <p>Explore trending outfits, most selling products and occasion wear.</p>
+
+      <a href="{{ url_for('trending') }}" class="btn" style="display:inline-block; width:auto;">
+        Shop Now
+      </a>
+    </div>
+
+    <div class="banner-img" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 100%;">
+      <!-- Category Cards - Large Style -->
+      <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s;">
+        <img src="{{ url_for('static', filename='images/denim_jecket.jpeg') }}" alt="Trending" style="width: 100%; height: 200px; object-fit: cover;">
+        <div style="padding: 20px; text-align: center;">
+          <h3 style="color: #172b6b; margin: 0 0 10px 0; font-size: 22px;">Trending</h3>
+          <p style="color: #666; margin: 0 0 15px 0; font-size: 14px;">Latest trending outfits for you</p>
+          <a href="{{ url_for('trending') }}" class="btn" style="display: inline-block; padding: 10px 20px; background: #172b6b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">View Products</a>
+        </div>
+      </div>
+
+      <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s;">
+        <img src="{{ url_for('static', filename='images/sarii.jpg') }}" alt="Occasion" style="width: 100%; height: 200px; object-fit: cover;">
+        <div style="padding: 20px; text-align: center;">
+          <h3 style="color: #172b6b; margin: 0 0 10px 0; font-size: 22px;">Occasion</h3>
+          <p style="color: #666; margin: 0 0 15px 0; font-size: 14px;">Perfect dresses for special events</p>
+          <a href="{{ url_for('occasion') }}" class="btn" style="display: inline-block; padding: 10px 20px; background: #172b6b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">View Products</a>
+        </div>
+      </div>
+
+      <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s;">
+        <img src="{{ url_for('static', filename='images/forest_green_watch.png') }}" alt="Most Selling" style="width: 100%; height: 200px; object-fit: cover;">
+        <div style="padding: 20px; text-align: center;">
+          <h3 style="color: #172b6b; margin: 0 0 10px 0; font-size: 22px;">Most Selling</h3>
+          <p style="color: #666; margin: 0 0 15px 0; font-size: 14px;">Most loved and top selling outfits</p>
+          <a href="{{ url_for('mostselling') }}" class="btn" style="display: inline-block; padding: 10px 20px; background: #172b6b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">View Products</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="footer-container">
+
+      <div class="footer-column">
+        <h4>About Trendify</h4>
+        <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+        <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+        <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+        <p><a href="{{ url_for('feedback') }}" style="color: inherit; text-decoration: none;">Feedback</a></p>
+      </div>
+
+      <div class="footer-column">
+        <h4>Help</h4>
+        <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+        <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+        <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+        <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+      </div>
+
+      <div class="footer-column">
+        <h4>Policies</h4>
+        <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+        <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+        <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+      </div>
+
+      <div class="footer-column">
+        <h4>Contact</h4>
+        <p><a href="mailto:support@trendify.com" style="color: inherit; text-decoration: none;">Email: support@trendify.com</a></p>
+        <p><a href="tel:+919313665646" style="color: inherit; text-decoration: none;">Phone: +91 9313665646</a></p>
+        <p>India</p>
+      </div>
+
+    </div>
+
+    <p class="footer-bottom">
+      © 2026 Trendify Fashion | All Rights Reserved
+    </p>
+  </footer>
+
+</body>
+</html>

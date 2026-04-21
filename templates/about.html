@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Trendify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- Navbar -->
+<header>
+    <a href="{{ url_for('home') }}" style="text-decoration: none;">
+        <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+             alt="Trendify Fashion" 
+             style="height: 50px; cursor: pointer;">
+    </a>
+
+    <nav>
+        <a href="{{ url_for('trending') }}">Trending</a>
+        <a href="{{ url_for('occasion') }}">Occasion</a>
+        <a href="{{ url_for('mostselling') }}">Most Selling</a>
+        <a href="{{ url_for('cart') }}">Cart</a>
+
+        {% if session.get("user_id") %}
+            <a href="#" style="font-weight:bold;">Welcome {{ session.get("username") }}</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </nav>
+</header>
+
+<!-- CONTENT -->
+<div style="max-width: 900px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <h1 style="color: #172b6b; margin-bottom: 10px;">About Us – Trendify</h1>
+    
+    <p style="margin-bottom: 20px; line-height: 1.8;">Trendify is an online platform dedicated to bringing the latest trends and quality products to customers.</p>
+    
+    <p style="margin-bottom: 20px; line-height: 1.8;">Our mission is to provide stylish, affordable, and reliable products while ensuring a smooth online shopping experience. We focus on customer satisfaction, product quality, and keeping up with modern trends.</p>
+    
+    <p style="margin-bottom: 20px; line-height: 1.8;">At Trendify, we believe that shopping should be simple, enjoyable, and accessible to everyone.</p>
+</div>
+
+<!-- Footer -->
+<footer class="main-footer">
+  <div class="footer-container">
+
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p><a href="mailto:support@trendify.com" style="color: inherit; text-decoration: none;">Email: support@trendify.com</a></p>
+      <p><a href="tel:+919313665646" style="color: inherit; text-decoration: none;">Phone: +91 9313665646</a></p>
+      <p>India</p>
+    </div>
+
+  </div>
+
+  <p class="footer-bottom">
+    © 2026 Trendify Fashion | All Rights Reserved
+  </p>
+</footer>
+
+</body>
+</html>

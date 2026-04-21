@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Occasion | Trendify Fashion</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get('username') %}
+      <a href="{{ url_for('profile') }}" class="welcome">Hi, {{ session.get('username') }}</a>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+
+    <form action="{{ url_for('search') }}" method="GET" style="display:flex; align-items:center; margin-left:10px;">
+      <input type="text" name="q" placeholder="Search products..."
+             style="padding:6px 12px; border:2px solid #ddd; border-radius:20px 0 0 20px; outline:none; font-size:13px; width:180px;">
+      <button type="submit" style="padding:6px 12px; background:#172b6b; color:white; border:none; border-radius:0 20px 20px 0; cursor:pointer; font-size:13px;">🔍</button>
+    </form>
+  </nav>
+</header>
+
+
+<div class="page-title">
+  <h2>🎉 Occasion Wear</h2>
+  <p>Perfect outfits for weddings, parties & celebrations</p>
+</div>
+
+
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Search products...">
+</div>
+
+<div class="no-result" id="noResult">❌ No products found</div>
+
+
+<section class="products">
+
+  {% for product in products %}
+  <div class="product-card"
+       data-name="{{ product.name|lower }}"
+       data-description="{{ product.description|lower }}"
+       data-quality="{{ product.quality|lower if product.quality else '' }}"
+       data-price="{{ product.price }}"
+       data-id="{{ product.id }}">
+
+    <!-- MAIN IMAGE -->
+    <a href="{{ url_for('product_details', product_id=product.id) }}">
+      <img src="{{ url_for('static', filename='images/' + product.image) }}"
+           alt="{{ product.name }}"
+           class="main-product-img">
+    </a>
+
+    <div class="product-info">
+      <h3>{{ product.name }}</h3>
+      <p>{{ product.description }}</p>
+
+      <div class="price">₹{{ product.price }}</div>
+
+      <!-- COLORS -->
+      {% if product.colors %}
+      <div class="colors">
+        {% for color in product.colors %}
+        <span class="color"
+              title="{{ color.color }}"
+              data-color="{{ color.color }}"
+              data-color-id="{{ color.id }}"
+              data-img="{{ url_for('static', filename='images/' + color.color_image) }}"
+              onclick="changeColorImage(this)">
+        </span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- SIZE -->
+      <div class="sizes">
+        {% if product.size %}
+          {% for s in product.size.split(',') %}
+            <span class="size" onclick="selectSize(this, {{ product.id }})">{{ s.strip() }}</span>
+          {% endfor %}
+        {% else %}
+          <span class="size active" onclick="selectSize(this, {{ product.id }})">Free</span>
+        {% endif %}
+      </div>
+
+      <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST">
+        <input type="hidden" name="color_id" id="selected_color_{{ product.id }}" value="">
+        <input type="hidden" name="size" id="selected_size_{{ product.id }}" value="">
+        <button type="submit" 
+            style="padding:8px 15px; background:black; color:white; border:none; cursor:pointer;">
+            Add to Cart
+        </button>
+      </form>
+    </div>
+
+  </div>
+  {% endfor %}
+
+</section>
+
+
+<!-- Footer -->
+<footer class="main-footer">
+  <div class="footer-container">
+
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+      <p><a href="{{ url_for('feedback') }}" style="color: inherit; text-decoration: none;">Feedback</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p>Email: support@trendify.com</p>
+      <p>Phone: +91 9313665646</p>
+      <p>India</p>
+    </div>
+
+  </div>
+
+  <p class="footer-bottom">
+    © 2026 Trendify Fashion | All Rights Reserved
+  </p>
+</footer>
+
+
+<script>
+/* ===========================
+   SEARCH FEATURE
+=========================== */
+const searchInput = document.getElementById("searchInput");
+const cards = document.querySelectorAll(".product-card");
+const noResult = document.getElementById("noResult");
+
+searchInput.addEventListener("keyup", () => {
+  const value = searchInput.value.toLowerCase();
+  let found = false;
+
+  cards.forEach(card => {
+    const name = card.dataset.name;
+    const desc = card.dataset.description;
+    const quality = card.dataset.quality;
+
+    if (name.includes(value) || desc.includes(value) || quality.includes(value)) {
+      card.style.display = "block";
+      found = true;
+    } else {
+      card.style.display = "none";
+    }
+  });
+
+  noResult.style.display = found ? "none" : "block";
+});
+
+
+/* ===========================
+   COLOR NAME FIX FUNCTION
+=========================== */
+function getRealColor(colorName) {
+  colorName = colorName.toLowerCase().trim();
+
+  const colorMap = {
+    "wine": "#722F37",
+    "forest green": "#228B22",
+    "cream": "#FFFDD0",
+    "navy": "navy",
+    "tan": "tan",
+    "brown": "brown",
+    "black": "black",
+    "white": "white",
+    "blue": "blue",
+    "pink": "pink",
+    "gray": "gray",
+    "maroon": "maroon",
+    "olive": "olive",
+    "green": "green",
+    "yellow": "yellow",
+    "purple": "purple",
+    "red": "red"
+  };
+
+  return colorMap[colorName] || colorName;
+}
+
+
+/* ===========================
+   APPLY COLORS TO CIRCLES
+=========================== */
+function applyColors() {
+  document.querySelectorAll(".color").forEach(c => {
+    const colorName = c.dataset.color;
+    c.style.backgroundColor = getRealColor(colorName);
+
+    if (getRealColor(colorName) === "white" || getRealColor(colorName) === "#FFFDD0") {
+      c.style.border = "2px solid #ccc";
+    }
+  });
+}
+
+applyColors();
+
+
+/* ===========================
+   DEFAULT FIRST COLOR AND SIZE ACTIVE
+=========================== */
+document.querySelectorAll(".product-card").forEach(card => {
+  const firstColor = card.querySelector(".color");
+  if (firstColor) {
+    firstColor.classList.add("active");
+    
+    // Set default color ID
+    const productId = card.dataset.id;
+    const colorId = firstColor.dataset.colorId;
+    const hiddenInput = document.getElementById(`selected_color_${productId}`);
+    if (hiddenInput && colorId) {
+      hiddenInput.value = colorId;
+    }
+  }
+  
+  // Set default size
+  const firstSize = card.querySelector(".size");
+  if (firstSize) {
+    firstSize.classList.add("active");
+    
+    const productId = card.dataset.id;
+    const sizeInput = document.getElementById(`selected_size_${productId}`);
+    if (sizeInput) {
+      sizeInput.value = firstSize.textContent.trim();
+    }
+  }
+});
+
+
+/* ===========================
+   SIZE SELECTION
+=========================== */
+function selectSize(el, productId) {
+  const card = el.closest(".product-card");
+  
+  // Remove active class from all sizes in this product
+  card.querySelectorAll(".size").forEach(s => s.classList.remove("active"));
+  
+  // Add active class to selected size
+  el.classList.add("active");
+  
+  // Set the selected size in hidden input
+  const sizeInput = document.getElementById(`selected_size_${productId}`);
+  if (sizeInput) {
+    sizeInput.value = el.textContent.trim();
+  }
+}
+
+
+/* ===========================
+   COLOR IMAGE CHANGE
+=========================== */
+function changeColorImage(el) {
+  const card = el.closest(".product-card");
+  const imgTag = card.querySelector(".main-product-img");
+  const newImg = el.dataset.img;
+  const productId = card.dataset.id;
+
+  imgTag.src = newImg;
+
+  card.querySelectorAll(".color").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+
+  // Set the selected color ID for the form
+  const colorId = el.dataset.colorId;
+  const hiddenInput = document.getElementById(`selected_color_${productId}`);
+  if (hiddenInput) {
+    hiddenInput.value = colorId;
+  }
+}
+
+
+/* ===========================
+   ADD TO CART (LOCAL STORAGE)
+=========================== */
+function addToCart(id, name, price, image) {
+
+  const item = {
+    id: id,
+    name: name,
+    price: Number(price),
+    image: image,
+    qty: 1
+  };
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  const existing = cart.find(p => p.id == id);
+
+  if(existing){
+    existing.qty += 1;
+  } else {
+    cart.push(item);
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert(name + " added to cart!");
+}
+</script>
+
+</body>
+</html>

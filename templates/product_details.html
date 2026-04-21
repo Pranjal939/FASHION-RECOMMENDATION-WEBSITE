@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ product.name }} - Trendify</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .thumbnail-item.active-thumb {
+      border-color: #172b6b !important;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get("user_id") %}
+      <span class="welcome">Welcome {{ session.get("username") }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+<section style="padding:30px 20px; display:flex; gap:30px; justify-content:center; flex-wrap:wrap; max-width:1400px; margin:0 auto;">
+
+  <!-- Image Gallery Section -->
+  {% if product.gallery_images %}
+  <div style="display:flex; gap:12px;">
+    <!-- Thumbnail Column -->
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      {% for img in product.gallery_images %}
+      <div class="thumbnail-item {% if loop.first %}active-thumb{% endif %}" 
+           data-img-src="{{ url_for('static', filename='images/' + img.image_path) }}"
+           onclick="changeMainImage(this)" 
+           style="width:60px; height:60px; border:2px solid #ddd; border-radius:6px; overflow:hidden; cursor:pointer; transition:all 0.3s;">
+        <img src="{{ url_for('static', filename='images/' + img.image_path) }}" 
+             alt="Product view {{ loop.index }}"
+             style="width:100%; height:100%; object-fit:cover;">
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- Main Image Display -->
+    <div style="width:350px; max-width:100%;">
+      <img id="mainProductImage" src="{{ url_for('static', filename='images/' + product.gallery_images[0].image_path) }}"
+           alt="{{ product.name }}"
+           style="width:100%; height:450px; object-fit:cover; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.15);">
+    </div>
+  </div>
+  {% else %}
+  <!-- Fallback to single image if no gallery images -->
+  <div style="width:350px; max-width:100%;">
+    <img id="mainProductImage" src="{{ url_for('static', filename='images/' + product.image) }}"
+         alt="{{ product.name }}"
+         style="width:100%; height:450px; object-fit:cover; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.15);">
+  </div>
+  {% endif %}
+
+  <div style="width:500px; max-width:100%; background:white; padding:20px; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1);">
+    <h2 style="color:#0a2a66; font-size:24px; margin-bottom:10px;">{{ product.name }}</h2>
+
+    <h3 style="margin-top:8px; color:green; font-size:26px;">₹{{ product.price }}</h3>
+
+    <p style="margin-top:12px; font-size:14px; line-height:1.5;">
+      <b>Description:</b> {{ product.description }}
+    </p>
+
+    <p style="margin-top:8px; font-size:14px;">
+      <b>Quality:</b> {{ product.quality }}
+    </p>
+
+    <p style="margin-top:8px; font-size:14px;">
+      <b>Available Quantity:</b> {{ product.quantity }}
+    </p>
+
+    <p style="margin-top:8px; font-size:14px;">
+      <b>Size:</b> {{ product.size }}
+    </p>
+
+    <!-- COLOR SELECTION -->
+    {% if product.colors %}
+    <div style="margin-top:15px;">
+      <b style="font-size:14px;">Select Color:</b>
+      <div class="colors" style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+        {% for color in product.colors %}
+        <span class="color"
+              title="{{ color.color }}"
+              data-color="{{ color.color }}"
+              data-color-id="{{ color.id }}"
+              data-img="{{ url_for('static', filename='images/' + color.color_image) }}"
+              onclick="changeColorImage(this)"
+              style="width:32px; height:32px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:all 0.3s;">
+        </span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- SIZE SELECTION -->
+    <div style="margin-top:15px;">
+      <b style="font-size:14px;">Select Size:</b>
+      <div class="sizes" style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+        {% if product.size %}
+          {% for s in product.size.split(',') %}
+            <span class="size" data-product-id="{{ product.id }}" onclick="selectSize(this)"
+                  style="padding:6px 12px; border:2px solid #ddd; border-radius:6px; cursor:pointer; transition:all 0.3s; font-weight:500; font-size:14px;">
+              {{ s.strip() }}
+            </span>
+          {% endfor %}
+        {% else %}
+          <span class="size active" data-product-id="{{ product.id }}" onclick="selectSize(this)"
+                style="padding:6px 12px; border:2px solid #172b6b; background:#172b6b; color:white; border-radius:6px; cursor:pointer; font-size:14px;">
+            Free Size
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST">
+      <input type="hidden" name="color_id" id="selected_color_{{ product.id }}" value="">
+      <input type="hidden" name="size" id="selected_size_{{ product.id }}" value="">
+      <button type="submit" style="margin-top:18px; padding:12px 24px; width:100%; background:#0a2a66; color:white; border:none; border-radius:8px; cursor:pointer; font-size:15px; font-weight:bold; transition:background 0.3s;">
+        Add To Cart
+      </button>
+    </form>
+
+  </div>
+
+</section>
+
+<!-- PRODUCT SPECIFICATIONS - Full width below, 2 columns -->
+{% if product.id == 1 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Category</td><td style="padding:10px 14px; color:#333;">Men's Jackets</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Material</td><td style="padding:10px 14px; color:#333;">Faux Leather / PU Leather</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Style</td><td style="padding:10px 14px; color:#333;">Biker / Motorcycle Jacket</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Slim Fit</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">Full Sleeves</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Front Zipper</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Collar Style</td><td style="padding:10px 14px; color:#333;">Notch Lapel Collar</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Solid</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Occasion</td><td style="padding:10px 14px; color:#333;">Casual Wear, Bike Riding, Winter Fashion</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Season</td><td style="padding:10px 14px; color:#333;">Winter / Autumn</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pockets</td><td style="padding:10px 14px; color:#333;">3–4 Zipper Pockets</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Wash Care</td><td style="padding:10px 14px; color:#333;">Dry Clean Only</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 2 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Brand</td><td style="padding:10px 14px; color:#333;">Nixon Style / Trendify Collection</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Category</td><td style="padding:10px 14px; color:#333;">Men's Watches</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Watch Type</td><td style="padding:10px 14px; color:#333;">Analog Wrist Watch</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Dial Shape</td><td style="padding:10px 14px; color:#333;">Round</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Dial Color</td><td style="padding:10px 14px; color:#333;">Silver / White</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Strap Material</td><td style="padding:10px 14px; color:#333;">Genuine Leather / PU Leather</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Strap Color</td><td style="padding:10px 14px; color:#333;">Brown</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Case Material</td><td style="padding:10px 14px; color:#333;">Stainless Steel</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Glass Type</td><td style="padding:10px 14px; color:#333;">Mineral Glass</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Movement Type</td><td style="padding:10px 14px; color:#333;">Quartz Movement</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Water Resistance</td><td style="padding:10px 14px; color:#333;">3 ATM (Splash Resistant)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Clasp Type</td><td style="padding:10px 14px; color:#333;">Buckle Clasp</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Dial Diameter</td><td style="padding:10px 14px; color:#333;">40 mm</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Strap Length</td><td style="padding:10px 14px; color:#333;">22 cm</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Occasion</td><td style="padding:10px 14px; color:#333;">Casual / Formal / Office Wear</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Warranty</td><td style="padding:10px 14px; color:#333;">6 Months Manufacturer Warranty</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 3 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Material</td><td style="padding:10px 14px; color:#333;">100% Cotton</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fabric Type</td><td style="padding:10px 14px; color:#333;">Lightweight Cotton</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Floral Print</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">Short Sleeves</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Neck Type</td><td style="padding:10px 14px; color:#333;">Spread Collar</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Front Button Closure</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Hemline</td><td style="padding:10px 14px; color:#333;">Curved Hem</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Transparency</td><td style="padding:10px 14px; color:#333;">Non-Transparent</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Breathability</td><td style="padding:10px 14px; color:#333;">High (Perfect for Summer ☀️)</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 4 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Material</td><td style="padding:10px 14px; color:#333;">Cotton Blend + Flannel</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fabric Type</td><td style="padding:10px 14px; color:#333;">Fleece Hoodie with Flannel Shirt</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Checkered / Plaid Shirt</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">Full Sleeves</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Neck Type</td><td style="padding:10px 14px; color:#333;">Hooded Neck</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Button Closure (Shirt)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Hood Type</td><td style="padding:10px 14px; color:#333;">Adjustable with Drawstring</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Waist Type</td><td style="padding:10px 14px; color:#333;">Elastic Waistband (Joggers)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Comfort Level</td><td style="padding:10px 14px; color:#333;">Soft and Warm</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Style</td><td style="padding:10px 14px; color:#333;">Layered Streetwear Look</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Model Fit</td><td style="padding:10px 14px; color:#333;">Model is wearing size M</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 5 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Upper Material</td><td style="padding:10px 14px; color:#333;">Premium Synthetic Leather</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sole Material</td><td style="padding:10px 14px; color:#333;">Durable Rubber Sole</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Inner Material</td><td style="padding:10px 14px; color:#333;">Soft Cushioned Fabric Lining</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Solid Color (White & Grey)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Toe Shape</td><td style="padding:10px 14px; color:#333;">Round Toe</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Lace-Up Closure</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Grip Type</td><td style="padding:10px 14px; color:#333;">Anti-Slip Rubber Sole</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Comfort Level</td><td style="padding:10px 14px; color:#333;">Cushioned Insole for all-day comfort</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Breathability</td><td style="padding:10px 14px; color:#333;">Air-perforated front design</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Durability</td><td style="padding:10px 14px; color:#333;">Strong stitching for long-lasting use</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Available Sizes</td><td style="padding:10px 14px; color:#333;">7, 8, 9, 10, 11, 12</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 6 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Material</td><td style="padding:10px 14px; color:#333;">Cotton Blend Fleece</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fabric Type</td><td style="padding:10px 14px; color:#333;">Soft Fleece Interior</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Colorblock with Printed Text</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">Full Sleeves</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Neck Type</td><td style="padding:10px 14px; color:#333;">High Neck with Quarter Zip</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Quarter Zip Closure</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Collar Style</td><td style="padding:10px 14px; color:#333;">Stand Collar</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Warmth Level</td><td style="padding:10px 14px; color:#333;">Medium Warm (Perfect for winter)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Comfort Level</td><td style="padding:10px 14px; color:#333;">Soft and breathable fabric</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Design Detail</td><td style="padding:10px 14px; color:#333;">"Los Angeles" graphic print on front</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Model Fit</td><td style="padding:10px 14px; color:#333;">Model is wearing size M</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 8 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Material</td><td style="padding:10px 14px; color:#333;">Premium Cotton Cargo Fabric</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fabric Type</td><td style="padding:10px 14px; color:#333;">Soft Twill Cotton</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Solid Color</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Straight Fit / Relaxed Fit</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Rise Type</td><td style="padding:10px 14px; color:#333;">High Rise</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Button & Zip Closure</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Pocket Type</td><td style="padding:10px 14px; color:#333;">Multiple Utility Cargo Pockets</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Waist Style</td><td style="padding:10px 14px; color:#333;">High-Waisted Design</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Comfort Level</td><td style="padding:10px 14px; color:#333;">Soft, breathable, and durable</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Design Detail</td><td style="padding:10px 14px; color:#333;">Side flap cargo pockets for utility style</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Available Sizes</td><td style="padding:10px 14px; color:#333;">M, L, XL</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Ideal For</td><td style="padding:10px 14px; color:#333;">Women</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 18 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Material</td><td style="padding:10px 14px; color:#333;">Premium Cotton Blend Fabric</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fabric Type</td><td style="padding:10px 14px; color:#333;">Lightweight Breathable Fabric</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Solid Color / Minimal Design</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">Short Sleeves (Men's Shirt)</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Front Button Closure (Men's Shirt)</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Waist Type</td><td style="padding:10px 14px; color:#333;">High-Waist Design (Women's Pants)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Comfort Level</td><td style="padding:10px 14px; color:#333;">Soft and breathable fabric</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Style</td><td style="padding:10px 14px; color:#333;">Elegant casual coordinated look</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Design Detail</td><td style="padding:10px 14px; color:#333;">Stylish matching color theme for couples</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Available Sizes</td><td style="padding:10px 14px; color:#333;">S, M, L, XL, XXL</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Ideal For</td><td style="padding:10px 14px; color:#333;">Couples / Men & Women</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 15 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Sherwani Fabric</td><td style="padding:10px 14px; color:#333;">Premium Silk Blend / Jacquard</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Inner Fabric</td><td style="padding:10px 14px; color:#333;">Soft Cotton Lining</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Bottom Fabric</td><td style="padding:10px 14px; color:#333;">Cotton / Churidar Fabric</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Design Work</td><td style="padding:10px 14px; color:#333;">All-over Embroidery / Self-design Pattern</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Collar Style</td><td style="padding:10px 14px; color:#333;">Classic Mandarin / Bandhgala</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Front Button with Metallic Buttons</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular / Slim Fit</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Length</td><td style="padding:10px 14px; color:#333;">Knee-length Sherwani</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">Full Sleeves</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Set Includes</td><td style="padding:10px 14px; color:#333;">1 Sherwani + 1 Churidar</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Occasion</td><td style="padding:10px 14px; color:#333;">Mehendi, Haldi, Wedding, Festive Events</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Style Tip</td><td style="padding:10px 14px; color:#333;">Pair with mojris or juttis</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 13 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Saree Fabric</td><td style="padding:10px 14px; color:#333;">Soft Georgette / Chiffon Blend</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Blouse Fabric</td><td style="padding:10px 14px; color:#333;">Matching Satin / Silk (Unstitched)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Texture</td><td style="padding:10px 14px; color:#333;">Lightweight, Flowy & Comfortable</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Border Work</td><td style="padding:10px 14px; color:#333;">Elegant Golden Zari / Embroidered Border</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Design Style</td><td style="padding:10px 14px; color:#333;">Minimalist Plain Body, Modern & Traditional</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Saree Length</td><td style="padding:10px 14px; color:#333;">5.5 meters</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Blouse Piece</td><td style="padding:10px 14px; color:#333;">0.8 meters (Unstitched)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Free Size (Customizable Blouse)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Occasion</td><td style="padding:10px 14px; color:#333;">Cocktail, Wedding, Reception, Festive</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Style Tip</td><td style="padding:10px 14px; color:#333;">Pair with statement choker & high heels</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 12 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Fabric</td><td style="padding:10px 14px; color:#333;">Premium Velvet</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Work Type</td><td style="padding:10px 14px; color:#333;">Mirror Embroidery</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Inner Lining</td><td style="padding:10px 14px; color:#333;">Soft Lining for Comfort</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Length</td><td style="padding:10px 14px; color:#333;">Hip Length / Mid-thigh</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">3/4th Sleeves</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Neck Type</td><td style="padding:10px 14px; color:#333;">V-Neck with Heavy Mirror Work</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Occasion</td><td style="padding:10px 14px; color:#333;">Festive, Party, Traditional Events</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Ideal For</td><td style="padding:10px 14px; color:#333;">Wedding Functions</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 11 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Set Type</td><td style="padding:10px 14px; color:#333;">2-Piece Set (Kurta + Pajama)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Kurta Fabric</td><td style="padding:10px 14px; color:#333;">Cotton Silk Blend</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pajama Fabric</td><td style="padding:10px 14px; color:#333;">Cotton</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Work Type</td><td style="padding:10px 14px; color:#333;">Thread Embroidery / Zari Work</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Floral Embroidered Design</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Neck Type</td><td style="padding:10px 14px; color:#333;">Mandarin Collar (Band Collar)</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">Full Sleeves</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Kurta Length</td><td style="padding:10px 14px; color:#333;">Knee Length</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Button Placket</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Available Sizes</td><td style="padding:10px 14px; color:#333;">S, M, L, XL</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit</td><td style="padding:10px 14px; color:#333;">Comfortable Ethnic Fit</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Model Height</td><td style="padding:10px 14px; color:#333;">5'11" wearing Size M</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 10 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Set Type</td><td style="padding:10px 14px; color:#333;">2-Piece Set (Kurti + Palazzo Pant)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Kurti Fabric</td><td style="padding:10px 14px; color:#333;">Cotton</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Bottom Fabric</td><td style="padding:10px 14px; color:#333;">Cotton</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Printed / Embroidered Yoke Design</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Work Type</td><td style="padding:10px 14px; color:#333;">Thread Work / Printed Design</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Neck Type</td><td style="padding:10px 14px; color:#333;">Round Neck</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">3/4 Sleeves</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Kurti Length</td><td style="padding:10px 14px; color:#333;">Knee Length</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Palazzo Type</td><td style="padding:10px 14px; color:#333;">Wide Leg Palazzo</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Waistband</td><td style="padding:10px 14px; color:#333;">Elastic Waist (Comfort Fit)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Available Sizes</td><td style="padding:10px 14px; color:#333;">S, M, L, XL</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Occasion</td><td style="padding:10px 14px; color:#333;">Festive, Casual, Office, Daily Wear</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Season</td><td style="padding:10px 14px; color:#333;">Summer / All Season</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 9 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Set Type</td><td style="padding:10px 14px; color:#333;">3-Piece Set (Kurta + Bottom + Dupatta)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Kurta Fabric</td><td style="padding:10px 14px; color:#333;">Silk Blend / Chanderi Silk</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Bottom Fabric</td><td style="padding:10px 14px; color:#333;">Cotton / Silk Blend</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Dupatta Fabric</td><td style="padding:10px 14px; color:#333;">Organza / Net</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Work Type</td><td style="padding:10px 14px; color:#333;">Embroidery with Zari Work</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Solid with Embroidered Detailing</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Neck Type</td><td style="padding:10px 14px; color:#333;">V-Neck</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">3/4 Sleeves</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Stitch Type</td><td style="padding:10px 14px; color:#333;">Fully Stitched</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Length</td><td style="padding:10px 14px; color:#333;">Calf Length Kurta</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Available Sizes</td><td style="padding:10px 14px; color:#333;">S, M, L, XL</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Occasion</td><td style="padding:10px 14px; color:#333;">Diwali, Wedding, Festive Wear, Party</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Season</td><td style="padding:10px 14px; color:#333;">All Season</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 19 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Material</td><td style="padding:10px 14px; color:#333;">Cotton Blend</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fabric Type</td><td style="padding:10px 14px; color:#333;">Soft Breathable Fabric</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Color Block (Panel Design)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Sleeve Type</td><td style="padding:10px 14px; color:#333;">Short Sleeves</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fit Type</td><td style="padding:10px 14px; color:#333;">Regular Fit</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Collar Type</td><td style="padding:10px 14px; color:#333;">Cuban Collar / Spread Collar</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Closure Type</td><td style="padding:10px 14px; color:#333;">Front Button Closure</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Design Style</td><td style="padding:10px 14px; color:#333;">Modern Minimalist Color Blocking</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Hemline</td><td style="padding:10px 14px; color:#333;">Straight Hem</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Stretch</td><td style="padding:10px 14px; color:#333;">Non-Stretch</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Breathability</td><td style="padding:10px 14px; color:#333;">High (Perfect for Summer ☀️)</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Available Sizes</td><td style="padding:10px 14px; color:#333;">S, M, L, XL, XXL</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% elif product.id == 14 %}
+<div style="max-width:1100px; margin:0 auto 40px auto; padding:0 20px;">
+  <div style="background:white; border-radius:12px; box-shadow:0px 4px 12px rgba(0,0,0,0.1); padding:25px;">
+    <h3 style="color:#0a2a66; font-size:18px; margin-bottom:18px; border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Product Details</h3>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+      <table style="border-collapse:collapse; font-size:13px; width:100%;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Brand</td><td style="padding:10px 14px; color:#333;">Trendify Collection</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Fabric</td><td style="padding:10px 14px; color:#333;">Banarasi Silk Blend</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Blouse Piece</td><td style="padding:10px 14px; color:#333;">Included (Unstitched Blouse Fabric)</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Saree Length</td><td style="padding:10px 14px; color:#333;">5.5 meters</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Blouse Length</td><td style="padding:10px 14px; color:#333;">0.8 meters</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Color</td><td style="padding:10px 14px; color:#333;">Red with Golden Border</td></tr>
+      </table>
+      <table style="border-collapse:collapse; font-size:13px; width:100%; border-left:2px solid #f0f0f0;">
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; width:40%; background:#f8f9fa;">Pattern</td><td style="padding:10px 14px; color:#333;">Traditional Woven Design</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Work Type</td><td style="padding:10px 14px; color:#333;">Zari Work</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Occasion</td><td style="padding:10px 14px; color:#333;">Festival, Wedding, Party Wear, Karva Chauth</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Wash Care</td><td style="padding:10px 14px; color:#333;">Dry Clean Recommended</td></tr>
+        <tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Country of Origin</td><td style="padding:10px 14px; color:#333;">India</td></tr>
+        <tr><td style="padding:10px 14px; color:#555; font-weight:600; background:#f8f9fa;">Weight</td><td style="padding:10px 14px; color:#333;">650 grams</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<footer class="main-footer">
+  <div class="footer-container">
+
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+      <p><a href="{{ url_for('feedback') }}" style="color: inherit; text-decoration: none;">Feedback</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p><a href="mailto:support@trendify.com" style="color: inherit; text-decoration: none;">Email: support@trendify.com</a></p>
+      <p><a href="tel:+919313665646" style="color: inherit; text-decoration: none;">Phone: +91 9313665646</a></p>
+      <p>India</p>
+    </div>
+
+  </div>
+
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+<script>
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+
+/* ===========================
+   THUMBNAIL IMAGE GALLERY
+=========================== */
+function changeMainImage(element) {
+  const mainImg = document.getElementById('mainProductImage');
+  const imageSrc = element.getAttribute('data-img-src');
+  mainImg.src = imageSrc;
+  
+  // Update thumbnail borders
+  document.querySelectorAll('.thumbnail-item').forEach(thumb => {
+    thumb.classList.remove('active-thumb');
+  });
+  
+  // Highlight selected thumbnail
+  element.classList.add('active-thumb');
+}
+
+// Make function global
+window.changeMainImage = changeMainImage;
+
+/* ===========================
+   COLOR NAME FIX FUNCTION
+=========================== */
+function getRealColor(colorName) {
+  colorName = colorName.toLowerCase().trim();
+
+  const colorMap = {
+    "wine": "#722F37",
+    "forest green": "#228B22",
+    "cream": "#FFFDD0",
+    "navy": "navy",
+    "tan": "tan",
+    "brown": "brown",
+    "black": "black",
+    "white": "white",
+    "blue": "blue",
+    "pink": "pink",
+    "gray": "gray",
+    "maroon": "maroon",
+    "olive": "olive",
+    "green": "green",
+    "yellow": "yellow",
+    "purple": "purple",
+    "red": "red"
+  };
+
+  return colorMap[colorName] || colorName;
+}
+
+/* ===========================
+   APPLY COLORS TO CIRCLES
+=========================== */
+function applyColors() {
+  document.querySelectorAll(".color").forEach(c => {
+    const colorName = c.dataset.color;
+    c.style.backgroundColor = getRealColor(colorName);
+
+    if (getRealColor(colorName) === "white" || getRealColor(colorName) === "#FFFDD0") {
+      c.style.border = "3px solid #ccc";
+    }
+  });
+}
+
+applyColors();
+
+/* ===========================
+   DEFAULT FIRST COLOR AND SIZE ACTIVE
+=========================== */
+const firstColor = document.querySelector(".color");
+if (firstColor) {
+  firstColor.style.border = "3px solid #172b6b";
+  firstColor.style.transform = "scale(1.1)";
+  
+  // Set default color ID
+  const colorId = firstColor.dataset.colorId;
+  const hiddenInput = document.querySelector('[id^="selected_color_"]');
+  if (hiddenInput && colorId) {
+    hiddenInput.value = colorId;
+  }
+}
+
+// Set default size
+const firstSize = document.querySelector(".size");
+if (firstSize) {
+  firstSize.style.borderColor = "#172b6b";
+  firstSize.style.background = "#172b6b";
+  firstSize.style.color = "white";
+  
+  const sizeInput = document.querySelector('[id^="selected_size_"]');
+  if (sizeInput) {
+    sizeInput.value = firstSize.textContent.trim();
+  }
+}
+
+/* ===========================
+   SIZE SELECTION
+=========================== */
+function selectSize(el) {
+  const productId = el.getAttribute('data-product-id');
+  
+  // Remove active class from all sizes
+  document.querySelectorAll(".size").forEach(s => {
+    s.style.borderColor = "#ddd";
+    s.style.background = "white";
+    s.style.color = "#222";
+  });
+  
+  // Add active class to selected size
+  el.style.borderColor = "#172b6b";
+  el.style.background = "#172b6b";
+  el.style.color = "white";
+  
+  // Set the selected size in hidden input
+  const sizeInput = document.getElementById(`selected_size_${productId}`);
+  if (sizeInput) {
+    sizeInput.value = el.textContent.trim();
+  }
+}
+
+/* ===========================
+   COLOR IMAGE CHANGE
+=========================== */
+function changeColorImage(el) {
+  const imgTag = document.getElementById('mainProductImage');
+  const newImg = el.dataset.img;
+
+  // Change the main image
+  imgTag.src = newImg;
+
+  // Remove active border from all colors
+  document.querySelectorAll(".color").forEach(c => {
+    c.style.border = "3px solid transparent";
+    c.style.transform = "scale(1)";
+    
+    if (getRealColor(c.dataset.color) === "white" || getRealColor(c.dataset.color) === "#FFFDD0") {
+      c.style.border = "3px solid #ccc";
+    }
+  });
+  
+  // Add active border to selected color
+  el.style.border = "3px solid #172b6b";
+  el.style.transform = "scale(1.1)";
+
+  // Set the selected color ID for the form
+  const colorId = el.dataset.colorId;
+  const hiddenInput = document.querySelector('[id^="selected_color_"]');
+  if (hiddenInput && colorId) {
+    hiddenInput.value = colorId;
+  }
+}
+
+// Make functions global
+window.changeColorImage = changeColorImage;
+window.selectSize = selectSize;
+
+}); // End DOMContentLoaded
+</script>
+
+</body>
+</html>
+

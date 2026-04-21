@@ -1,0 +1,149 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Add Product{% endblock %}
+{% block page_title %}Add New Product{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #172b6b;
+        font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .submit-btn {
+        background: #28a745;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .submit-btn:hover {
+        background: #218838;
+    }
+
+    .cancel-btn {
+        background: #6c757d;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .cancel-btn:hover {
+        background: #5a6268;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="form-container">
+    <form method="POST">
+        <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label>Price (₹)</label>
+            <input type="number" name="price" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Quality</label>
+            <input type="text" name="quality" placeholder="e.g., Premium, Standard" required>
+        </div>
+
+        <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" name="quantity" required>
+        </div>
+
+        <div class="form-group">
+            <label>Size</label>
+            <input type="text" name="size" placeholder="e.g., S, M, L, XL" required>
+        </div>
+
+        <div class="form-group">
+            <label>Image Filename</label>
+            <input type="text" name="image" placeholder="e.g., product.jpg" required>
+            <small style="color: #666;">Upload image to static/images/ folder first</small>
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select name="category_id" required>
+                <option value="">Select Category</option>
+                <option value="1">Trending</option>
+                <option value="2">Occasion</option>
+            </select>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="submit-btn">Add Product</button>
+            <a href="{{ url_for('admin_products') }}" class="cancel-btn">Cancel</a>
+        </div>
+    </form>
+    
+    <div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+        <h4 style="color: #1976d2; margin-bottom: 10px;">📝 Note: Adding Product Colors</h4>
+        <p style="color: #555; margin-bottom: 10px;">
+            After adding this product, you can add color variants from the 
+            <strong>🎨 Product Colors</strong> section in the sidebar.
+        </p>
+        <p style="color: #555;">
+            <strong>Steps:</strong><br>
+            1. Add the product here first<br>
+            2. Go to "🎨 Product Colors" in sidebar<br>
+            3. Click "Add New Color"<br>
+            4. Select this product and add color variants
+        </p>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Order Details{% endblock %}
+{% block page_title %}Order #{{ order.id }} Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .order-info, .order-items {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-info h3, .order-items h3 {
+        color: #172b6b;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #172b6b;
+        padding-bottom: 10px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+
+    .info-label {
+        font-weight: bold;
+        color: #172b6b;
+    }
+
+    .status-form {
+        margin-top: 20px;
+        padding: 15px;
+        background: #e3f2fd;
+        border-radius: 8px;
+    }
+
+    .status-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+
+    .update-btn {
+        background: #28a745;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .update-btn:hover {
+        background: #218838;
+    }
+
+    .item-row {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .item-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 15px;
+    }
+
+    .item-details {
+        flex: 1;
+    }
+
+    .item-name {
+        font-weight: bold;
+        color: #172b6b;
+        margin-bottom: 5px;
+    }
+
+    .item-price {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .item-total {
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .back-btn {
+        background: #6c757d;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .back-btn:hover {
+        background: #5a6268;
+    }
+
+    .grand-total {
+        text-align: right;
+        padding: 15px;
+        background: #172b6b;
+        color: white !important;
+        border-radius: 8px;
+        margin-top: 15px;
+    }
+    
+    .grand-total h3 {
+        color: white !important;
+        margin: 0;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('admin_orders') }}" class="back-btn">← Back to Orders</a>
+
+<div class="order-container">
+    
+    <!-- ORDER INFO -->
+    <div class="order-info">
+        <h3>Order Information</h3>
+        
+        <div class="info-row">
+            <span class="info-label">Order ID:</span>
+            <span>#{{ order.id }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">Customer:</span>
+            <span>{{ order.username }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">Total Amount:</span>
+            <span>₹{{ order.total_amount }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">Payment Method:</span>
+            <span>{{ order.payment_method }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">Order Date:</span>
+            <span>{{ order.order_date.strftime('%d %B %Y, %I:%M %p') }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">Current Status:</span>
+            <span style="font-weight: bold; color: #ffc107;">{{ order.order_status }}</span>
+        </div>
+
+        <!-- UPDATE STATUS -->
+        <div class="status-form">
+            {% if order.order_status == 'Cancelled' %}
+            <h4 style="color:#dc3545;">Order Cancelled by Customer</h4>
+            <p style="color:#666; font-size:13px; margin:0;">This order was cancelled by the customer. No further status updates are allowed.</p>
+            {% else %}
+            <h4 style="margin-bottom: 10px; color: #172b6b;">Update Order Status</h4>
+            <form action="{{ url_for('admin_update_order_status', order_id=order.id) }}" method="POST">
+                <select name="status" class="status-select" required>
+                    <option value="Pending" {% if order.order_status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Processing" {% if order.order_status == 'Processing' %}selected{% endif %}>Processing</option>
+                    <option value="Shipped" {% if order.order_status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                    <option value="Delivered" {% if order.order_status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                </select>
+                <button type="submit" class="update-btn">Update Status</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ORDER ITEMS -->
+    <div class="order-items">
+        <h3>Order Items</h3>
+        
+        {% for item in order_items %}
+        <div class="item-row">
+            <img src="{{ url_for('static', filename='images/' + item.image) }}" 
+                 class="item-image" alt="{{ item.name }}">
+            
+            <div class="item-details">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-price">
+                    Price: ₹{{ item.price }} × {{ item.quantity }}
+                </div>
+            </div>
+            
+            <div class="item-total">
+                ₹{{ item.price * item.quantity }}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="grand-total">
+            <h3>Grand Total: ₹{{ order.total_amount }}</h3>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

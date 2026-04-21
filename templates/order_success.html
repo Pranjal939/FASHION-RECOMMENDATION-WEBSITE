@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Success | Trendify Fashion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('home') }}">Home</a>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get('username') %}
+      <span class="welcome">Hi, {{ session.get('username') }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+<!-- SUCCESS MESSAGE -->
+<div style="text-align:center; margin:50px auto; max-width:600px;">
+    
+    <div style="background:white; padding:40px; border-radius:15px; box-shadow:0 6px 20px rgba(0,0,0,0.1);">
+        
+        <!-- SUCCESS ICON -->
+        <div style="font-size:80px; color:#28a745; margin-bottom:20px;">✅</div>
+        
+        <h1 style="color:#172b6b; margin-bottom:10px;">Order Placed Successfully!</h1>
+        
+        <p style="font-size:18px; color:#666; margin-bottom:30px;">
+            Thank you for your order. We'll process it shortly.
+        </p>
+        
+        <!-- ORDER DETAILS -->
+        <div style="background:#f8f9fa; padding:20px; border-radius:10px; margin-bottom:30px;">
+            <h3 style="color:#172b6b; margin-bottom:15px;">Order Details</h3>
+            
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span><strong>Order ID:</strong></span>
+                <span>#{{ order.id }}</span>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span><strong>Total Amount:</strong></span>
+                <span>₹{{ order.total_amount }}</span>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span><strong>Payment Method:</strong></span>
+                <span>{{ order.payment_method }}</span>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span><strong>Order Status:</strong></span>
+                <span style="color:#ffc107; font-weight:bold;">{{ order.order_status }}</span>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between;">
+                <span><strong>Order Date:</strong></span>
+                <span>{{ order.order_date.strftime('%d %B %Y, %I:%M %p') }}</span>
+            </div>
+        </div>
+        
+        <!-- ACTION BUTTONS -->
+        <div style="display:flex; gap:15px; justify-content:center;">
+            <a href="{{ url_for('home') }}" 
+               style="padding:12px 25px; background:#172b6b; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
+               Continue Shopping
+            </a>
+            
+            <a href="{{ url_for('trending') }}" 
+               style="padding:12px 25px; background:#28a745; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
+               View More Products
+            </a>
+        </div>
+        
+        <!-- ADDITIONAL INFO -->
+        <div style="margin-top:30px; padding:15px; background:#e3f2fd; border-radius:8px;">
+            <p style="margin:0; font-size:14px; color:#1976d2;">
+                📧 Order confirmation has been sent to your email.<br>
+                📱 You can track your order status by contacting our support team.
+            </p>
+        </div>
+        
+    </div>
+    
+</div>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+  <div class="footer-container">
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p>Email: support@trendify.com</p>
+      <p>Phone: +91 9313665646</p>
+      <p>India</p>
+    </div>
+  </div>
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>

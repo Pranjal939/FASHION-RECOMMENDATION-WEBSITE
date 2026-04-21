@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback - Trendify</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .feedback-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .feedback-title {
+      text-align: center;
+      color: #0a2a66;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .feedback-subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #0a2a66;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    .rating-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .star-rating {
+      display: flex;
+      gap: 5px;
+      font-size: 32px;
+      cursor: pointer;
+    }
+    .star {
+      color: #ddd;
+      transition: color 0.2s;
+    }
+    .star.active,
+    .star:hover {
+      color: #ffc107;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #0a2a66;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .submit-btn:hover {
+      background: #172b6b;
+    }
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get("user_id") %}
+      <span class="welcome">Welcome {{ session.get("username") }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+<div class="feedback-container">
+  <h1 class="feedback-title">We Value Your Feedback</h1>
+  <p class="feedback-subtitle">Help us improve your shopping experience</p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" action="{{ url_for('feedback') }}">
+    <div class="form-group">
+      <label for="name">Your Name</label>
+      <input type="text" id="name" name="name" placeholder="Enter your name" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Your Email</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email (example@gmail.com)" required>
+      <span id="emailError" style="color:#dc3545; font-size:13px; display:none;">Please enter a valid email (e.g. user@gmail.com)</span>
+    </div>
+
+    <div class="form-group">
+      <label>Rate Your Experience</label>
+      <div class="rating-group">
+        <div class="star-rating" id="starRating">
+          <span class="star" data-rating="1">★</span>
+          <span class="star" data-rating="2">★</span>
+          <span class="star" data-rating="3">★</span>
+          <span class="star" data-rating="4">★</span>
+          <span class="star" data-rating="5">★</span>
+        </div>
+        <span id="ratingText" style="color: #666; font-size: 14px;">Select rating</span>
+      </div>
+      <input type="hidden" id="rating" name="rating" value="" required>
+    </div>
+
+    <div class="form-group">
+      <label for="message">Your Feedback</label>
+      <textarea id="message" name="message" placeholder="Tell us about your experience..." required></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn">Submit Feedback</button>
+  </form>
+</div>
+
+<footer class="main-footer">
+  <div class="footer-container">
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+      <p><a href="{{ url_for('feedback') }}" style="color: inherit; text-decoration: none;">Feedback</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p><a href="mailto:support@trendify.com" style="color: inherit; text-decoration: none;">Email: support@trendify.com</a></p>
+      <p><a href="tel:+919313665646" style="color: inherit; text-decoration: none;">Phone: +91 9313665646</a></p>
+      <p>India</p>
+    </div>
+  </div>
+
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+<script>
+  const stars = document.querySelectorAll('.star');
+  const ratingInput = document.getElementById('rating');
+  const ratingText = document.getElementById('ratingText');
+  let selectedRating = 0;
+
+  stars.forEach(star => {
+    star.addEventListener('click', function() {
+      selectedRating = parseInt(this.getAttribute('data-rating'));
+      ratingInput.value = selectedRating;
+      updateStars(selectedRating);
+      updateRatingText(selectedRating);
+    });
+
+    star.addEventListener('mouseenter', function() {
+      const hoverRating = parseInt(this.getAttribute('data-rating'));
+      updateStars(hoverRating);
+    });
+  });
+
+  document.getElementById('starRating').addEventListener('mouseleave', function() {
+    updateStars(selectedRating);
+  });
+
+  function updateStars(rating) {
+    stars.forEach((star, index) => {
+      if (index < rating) {
+        star.classList.add('active');
+      } else {
+        star.classList.remove('active');
+      }
+    });
+  }
+
+  function updateRatingText(rating) {
+    const texts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+    ratingText.textContent = texts[rating];
+  }
+
+  // Email validation
+  const emailInput = document.getElementById('email');
+  const emailError = document.getElementById('emailError');
+  const emailRegex = /^[a-zA-Z0-9]+[a-zA-Z0-9._-]*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,3}$/;
+
+  function validateEmail(email) {
+    return emailRegex.test(email) && !email.includes('..') && !email.startsWith('.') && !email.endsWith('.');
+  }
+
+  emailInput.addEventListener('input', function() {
+    // Prevent consecutive dots
+    this.value = this.value.replace(/\.{2,}/g, '.');
+    // Prevent dot at the start
+    if (this.value.startsWith('.')) this.value = this.value.slice(1);
+    // Hide error while typing
+    emailError.style.display = 'none';
+    this.style.borderColor = '#ddd';
+  });
+
+  emailInput.addEventListener('blur', function() {
+    if (this.value && !validateEmail(this.value)) {
+      emailError.style.display = 'block';
+      this.style.borderColor = '#dc3545';
+    } else {
+      emailError.style.display = 'none';
+      this.style.borderColor = '#ddd';
+    }
+  });
+
+  // Form validation before submit
+  document.querySelector('form').addEventListener('submit', function(e) {
+    const email = emailInput.value;
+    const rating = document.getElementById('rating').value;
+
+    if (!rating) {
+      e.preventDefault();
+      document.getElementById('ratingText').textContent = '⚠ Please select a rating!';
+      document.getElementById('ratingText').style.color = '#dc3545';
+      return false;
+    }
+
+    if (!validateEmail(email)) {
+      e.preventDefault();
+      emailError.style.display = 'block';
+      emailInput.style.borderColor = '#dc3545';
+      emailInput.focus();
+      return false;
+    }
+  });
+</script>
+
+</body>
+</html>

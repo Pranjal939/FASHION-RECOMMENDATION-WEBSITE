@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping Policy - Trendify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get('username') %}
+      <span class="welcome">Hi, {{ session.get('username') }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+<!-- CONTENT -->
+<div style="max-width: 900px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <h1 style="color: #172b6b; margin-bottom: 10px;">Shipping Policy – Trendify</h1>
+    <p style="color: #666; margin-bottom: 30px;"><strong>Last Updated:</strong> 10 March 2026</p>
+
+    <p style="margin-bottom: 20px;">Trendify aims to deliver products quickly and securely.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">1. Order Processing</h2>
+    <p style="margin-bottom: 20px;">Orders are usually processed within 1–3 business days after payment confirmation.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">2. Shipping Time</h2>
+    <p style="margin-bottom: 10px;">Estimated delivery times:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>Local deliveries: 3–5 business days</li>
+        <li>National deliveries: 5–10 business days</li>
+        <li>International deliveries (if available): 10–20 business days</li>
+    </ul>
+    <p style="margin-bottom: 20px;">Delivery times may vary due to logistics or external factors.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">3. Shipping Charges</h2>
+    <p style="margin-bottom: 10px;">Shipping costs may vary depending on:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px;">
+        <li>Delivery location</li>
+        <li>Order size or weight</li>
+        <li>Ongoing promotions</li>
+    </ul>
+    <p style="margin-bottom: 20px;">Shipping fees will be displayed during checkout.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">4. Tracking Orders</h2>
+    <p style="margin-bottom: 20px;">Once the order is shipped, customers will receive a tracking number via email or SMS.</p>
+
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">5. Delays</h2>
+    <p style="margin-bottom: 10px;">Trendify is not responsible for delays caused by:</p>
+    <ul style="margin-left: 30px; margin-bottom: 30px;">
+        <li>Weather conditions</li>
+        <li>Courier company issues</li>
+        <li>Customs processing</li>
+    </ul>
+
+    <a href="{{ url_for('home') }}" style="display: inline-block; padding: 12px 25px; background: #172b6b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">← Back to Home</a>
+</div>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+  <div class="footer-container">
+
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p><a href="mailto:support@trendify.com" style="color: inherit; text-decoration: none;">Email: support@trendify.com</a></p>
+      <p><a href="tel:+919313665646" style="color: inherit; text-decoration: none;">Phone: +91 9313665646</a></p>
+      <p>India</p>
+    </div>
+
+  </div>
+
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>

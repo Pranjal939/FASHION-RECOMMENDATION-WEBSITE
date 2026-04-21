@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Return Order - Trendify</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}"
+         alt="Trendify Fashion" style="height: 50px; cursor: pointer;">
+  </a>
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+    <a href="{{ url_for('profile') }}" class="welcome">{{ session.get("username") }}</a>
+    <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+  </nav>
+</header>
+
+<div style="max-width:600px; margin:40px auto; padding:0 20px;">
+
+  <a href="{{ url_for('my_orders') }}" style="color:#0a2a66; text-decoration:none; font-size:14px;">← Back to My Orders</a>
+
+  <div style="background:white; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:30px; margin-top:16px;">
+    <h2 style="color:#0a2a66; margin-bottom:6px;">Return Request</h2>
+    <p style="color:#888; font-size:13px; margin-bottom:24px;">Order placed on {{ order.order_date.strftime('%d %b %Y') }}</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="padding:12px; background:#f8d7da; color:#721c24; border-radius:8px; margin-bottom:16px;">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('return_order', order_id=order.id) }}">
+      <div style="margin-bottom:20px;">
+        <label style="display:block; font-weight:600; color:#333; margin-bottom:8px; font-size:14px;">Reason for Return</label>
+        <select name="reason" style="width:100%; padding:10px 12px; border:2px solid #ddd; border-radius:8px; font-size:14px; margin-bottom:10px;" required>
+          <option value="">Select a reason</option>
+          <option>Wrong size received</option>
+          <option>Damaged / defective product</option>
+          <option>Wrong product delivered</option>
+          <option>Product not as described</option>
+          <option>Changed my mind</option>
+          <option>Other</option>
+        </select>
+        <textarea name="reason" placeholder="Describe your issue in detail..." required
+                  style="width:100%; padding:10px 12px; border:2px solid #ddd; border-radius:8px; font-size:14px; min-height:100px; box-sizing:border-box; resize:vertical;"></textarea>
+      </div>
+
+      <div style="background:#fff3cd; padding:12px; border-radius:8px; margin-bottom:20px; font-size:13px; color:#856404;">
+        ⚠️ Return requests are reviewed within 2-3 business days. Our team will contact you at your registered phone/email.
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <a href="{{ url_for('my_orders') }}"
+           style="flex:1; padding:12px; background:#6c757d; color:white; text-decoration:none; border-radius:8px; text-align:center; font-weight:bold;">
+          Cancel
+        </a>
+        <button type="submit"
+                style="flex:1; padding:12px; background:#fd7e14; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:15px;">
+          Submit Return Request
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer class="main-footer">
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>

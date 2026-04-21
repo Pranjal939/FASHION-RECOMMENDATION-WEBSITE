@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Trendify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- Navbar -->
+<header>
+    <a href="{{ url_for('home') }}" style="text-decoration: none;">
+        <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+             alt="Trendify Fashion" 
+             style="height: 50px; cursor: pointer;">
+    </a>
+
+    <nav>
+        <a href="{{ url_for('trending') }}">Trending</a>
+        <a href="{{ url_for('occasion') }}">Occasion</a>
+        <a href="{{ url_for('mostselling') }}">Most Selling</a>
+        <a href="{{ url_for('cart') }}">Cart</a>
+
+        {% if session.get("user_id") %}
+            <a href="#" style="font-weight:bold;">Welcome {{ session.get("username") }}</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </nav>
+</header>
+
+<!-- CONTENT -->
+<div style="max-width: 900px; margin: 40px auto; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <h1 style="color: #172b6b; margin-bottom: 20px;">Frequently Asked Questions (FAQ) – Trendify</h1>
+    
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">1. What is Trendify?</h2>
+    <p style="margin-bottom: 20px; line-height: 1.8;">Trendify is an online platform where customers can explore and purchase trendy and high-quality products.</p>
+    
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">2. How do I create an account?</h2>
+    <p style="margin-bottom: 10px; line-height: 1.8;">You can create an account by:</p>
+    <ol style="margin-left: 30px; margin-bottom: 20px; line-height: 1.8;">
+        <li>Clicking on the Sign Up button.</li>
+        <li>Entering your email, phone number, and password.</li>
+        <li>Verifying your account.</li>
+    </ol>
+    
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">3. How do I place an order?</h2>
+    <p style="margin-bottom: 10px; line-height: 1.8;">To place an order:</p>
+    <ol style="margin-left: 30px; margin-bottom: 20px; line-height: 1.8;">
+        <li>Browse products on the website.</li>
+        <li>Add the desired item to your cart.</li>
+        <li>Proceed to checkout.</li>
+        <li>Enter shipping details and complete payment.</li>
+    </ol>
+    
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">4. Can I track my order?</h2>
+    <p style="margin-bottom: 20px; line-height: 1.8;">Yes. Once your order is shipped, you will receive a tracking number via email or SMS.</p>
+    
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">5. What should I do if I receive a damaged product?</h2>
+    <p style="margin-bottom: 20px; line-height: 1.8;">If you receive a damaged or incorrect product, contact our support team within 7 days of delivery.</p>
+    
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">6. Can I cancel my order?</h2>
+    <p style="margin-bottom: 20px; line-height: 1.8;">Orders can be canceled before they are shipped. After shipping, cancellation may not be possible.</p>
+    
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">7. How long does delivery take?</h2>
+    <p style="margin-bottom: 10px; line-height: 1.8;">Delivery usually takes:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px; line-height: 1.8;">
+        <li>3–5 days for local orders</li>
+        <li>5–10 days for national orders</li>
+    </ul>
+    <p style="margin-bottom: 20px; line-height: 1.8;">Delivery time may vary depending on location.</p>
+    
+    <h2 style="color: #172b6b; margin-top: 30px; margin-bottom: 15px;">8. How do I contact customer support?</h2>
+    <p style="margin-bottom: 10px; line-height: 1.8;">You can contact our support team through:</p>
+    <ul style="margin-left: 30px; margin-bottom: 20px; line-height: 1.8;">
+        <li>Email: <a href="mailto:support@trendify.com" style="color: #172b6b; text-decoration: none;">support@trendify.com</a></li>
+        <li>Phone: <a href="tel:+919313665646" style="color: #172b6b; text-decoration: none;">+91 9313665646</a></li>
+    </ul>
+</div>
+
+<!-- Footer -->
+<footer class="main-footer">
+  <div class="footer-container">
+
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p><a href="mailto:support@trendify.com" style="color: inherit; text-decoration: none;">Email: support@trendify.com</a></p>
+      <p><a href="tel:+919313665646" style="color: inherit; text-decoration: none;">Phone: +91 9313665646</a></p>
+      <p>India</p>
+    </div>
+
+  </div>
+
+  <p class="footer-bottom">
+    © 2026 Trendify Fashion | All Rights Reserved
+  </p>
+</footer>
+
+</body>
+</html>

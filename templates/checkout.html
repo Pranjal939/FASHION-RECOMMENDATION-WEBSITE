@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout | Trendify Fashion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="{{ url_for('home') }}" style="text-decoration: none;">
+    <img src="{{ url_for('static', filename='images/logo1.jpg') }}" 
+         alt="Trendify Fashion" 
+         style="height: 50px; cursor: pointer;">
+  </a>
+
+  <nav>
+    <a href="{{ url_for('trending') }}">Trending</a>
+    <a href="{{ url_for('occasion') }}">Occasion</a>
+    <a href="{{ url_for('mostselling') }}">Most Selling</a>
+    <a href="{{ url_for('cart') }}">Cart</a>
+
+    {% if session.get('username') %}
+      <span class="welcome">Hi, {{ session.get('username') }}</span>
+      <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+  </nav>
+</header>
+
+<!-- CHECKOUT TITLE -->
+<h2 style="text-align:center; margin-top:30px;">🛒 Checkout</h2>
+
+<div style="width:80%; margin:30px auto; display:flex; gap:30px;">
+
+    <!-- ORDER SUMMARY -->
+    <div style="flex:1; background:white; padding:25px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+        <h3 style="color:#172b6b; margin-bottom:20px;">Order Summary</h3>
+        
+        {% for item in cart_items %}
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
+            <div style="display:flex; align-items:center;">
+                <img src="{{ url_for('static', filename='images/' + item.image) }}" 
+                     width="60" style="margin-right:15px; border-radius:5px;">
+                <div>
+                    <h4 style="margin:0;">{{ item.name }}</h4>
+                    {% if item.color %}<p style="margin:2px 0; font-size:14px; color:#666;">Color: {{ item.color|title }}</p>{% endif %}
+                    {% if item.size %}<p style="margin:2px 0; font-size:14px; color:#666;">Size: {{ item.size }}</p>{% endif %}
+                    <p style="margin:2px 0; font-size:14px; color:#666;">Qty: {{ item.quantity }}</p>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <p style="margin:0; font-weight:bold;">₹{{ item.total }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div style="margin-top:20px; padding-top:15px; border-top:2px solid #172b6b;">
+            <h3 style="text-align:right; color:#172b6b;">Grand Total: ₹{{ grand_total }}</h3>
+        </div>
+    </div>
+
+    <!-- CHECKOUT FORM -->
+    <div style="flex:1; background:white; padding:25px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+        <h3 style="color:#172b6b; margin-bottom:4px;">Delivery & Payment Details</h3>
+        <p style="color:#888; font-size:13px; margin-bottom:20px;">Fill in your delivery information below</p>
+
+        <form action="{{ url_for('place_order') }}" method="POST">
+
+            <!-- Section: Contact Info -->
+            <p style="color:#172b6b; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; border-bottom:1px solid #f0f0f0; padding-bottom:6px;">Contact Information</p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+                <div>
+                    <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:13px;">Full Name</label>
+                    <input type="text" name="full_name" placeholder="e.g. Pranjal Jotangiya"
+                           style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;" required minlength="2" maxlength="50">
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:13px;">Email</label>
+                    <input type="email" name="email" id="emailInput" placeholder="example@gmail.com"
+                           style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;" required>
+                </div>
+            </div>
+
+            <div style="margin-bottom:14px;">
+                <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:13px;">Phone Number</label>
+                <input type="tel" name="phone" id="phoneInput" placeholder="10 digit phone number"
+                       maxlength="10" minlength="10" pattern="[0-9]{10}"
+                       style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;"
+                       required title="Please enter exactly 10 digits">
+                <small style="color:#888; font-size:12px;">Must be exactly 10 digits</small>
+            </div>
+
+            <!-- Section: Delivery Address -->
+            <p style="color:#172b6b; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; border-bottom:1px solid #f0f0f0; padding-bottom:6px; margin-top:20px;">Delivery Address</p>
+
+            <div style="margin-bottom:14px;">
+                <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:13px;">Street Address</label>
+                <textarea name="address" placeholder="House no., Street, Area, Landmark..."
+                          style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; min-height:70px; box-sizing:border-box; resize:vertical;" required></textarea>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px;">
+                <div>
+                    <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:13px;">City</label>
+                    <input type="text" name="city" placeholder="City"
+                           style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;" required>
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:13px;">State</label>
+                    <select name="state" style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;" required>
+                        <option value="">Select State</option>
+                        <option>Andhra Pradesh</option>
+                        <option>Arunachal Pradesh</option>
+                        <option>Assam</option>
+                        <option>Bihar</option>
+                        <option>Chhattisgarh</option>
+                        <option>Delhi</option>
+                        <option>Goa</option>
+                        <option>Gujarat</option>
+                        <option>Haryana</option>
+                        <option>Himachal Pradesh</option>
+                        <option>Jharkhand</option>
+                        <option>Karnataka</option>
+                        <option>Kerala</option>
+                        <option>Madhya Pradesh</option>
+                        <option>Maharashtra</option>
+                        <option>Manipur</option>
+                        <option>Meghalaya</option>
+                        <option>Mizoram</option>
+                        <option>Nagaland</option>
+                        <option>Odisha</option>
+                        <option>Punjab</option>
+                        <option>Rajasthan</option>
+                        <option>Sikkim</option>
+                        <option>Tamil Nadu</option>
+                        <option>Telangana</option>
+                        <option>Tripura</option>
+                        <option>Uttar Pradesh</option>
+                        <option>Uttarakhand</option>
+                        <option>West Bengal</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:6px; color:#333; font-weight:600; font-size:13px;">Pincode</label>
+                    <input type="text" name="pincode" id="pincodeInput" placeholder="6 digit pincode"
+                           maxlength="6" minlength="6" pattern="[0-9]{6}"
+                           style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;"
+                           required title="Please enter a valid 6 digit pincode">
+                </div>
+            </div>
+
+            <!-- Section: Payment -->
+            <p style="color:#172b6b; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; border-bottom:1px solid #f0f0f0; padding-bottom:6px; margin-top:20px;">Payment Method</p>
+
+            <div style="margin-bottom:24px;">
+                <select name="payment_method" id="paymentSelect" style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px;" required>
+                    <option value="COD">💵 Cash on Delivery (COD)</option>
+                    <option value="Online">📱 UPI (Google Pay / PhonePe / Paytm)</option>
+                    <option value="Card">💳 Credit / Debit Card</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <a href="{{ url_for('cart') }}"
+                   style="flex:1; padding:12px; background:#6c757d; color:white; text-decoration:none; border-radius:8px; text-align:center; font-weight:bold;">
+                   Back to Cart
+                </a>
+                <button type="button" id="placeOrderBtn"
+                        style="flex:1; padding:12px; background:#172b6b; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px;">
+                    Place Order
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<!-- FAKE PAYMENT MODAL -->
+<div id="paymentModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background:white; border-radius:16px; padding:32px; width:420px; max-width:95%; box-shadow:0 8px 32px rgba(0,0,0,0.3); position:relative;">
+
+    <!-- Payment Form Step -->
+    <div id="paymentFormStep">
+      <div style="text-align:center; margin-bottom:20px;">
+        <div style="font-size:32px; margin-bottom:8px;">💳</div>
+        <h3 style="color:#0a2a66; margin:0 0 4px 0;">Secure Payment</h3>
+        <p style="color:#888; font-size:13px; margin:0;">Your payment is 100% secure & encrypted</p>
+      </div>
+
+      <!-- Payment Tabs -->
+      <div style="display:flex; gap:8px; margin-bottom:20px;">
+        <button type="button" onclick="switchTab('card')" id="tabCard"
+                style="flex:1; padding:8px; background:#0a2a66; color:white; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">Card</button>
+        <button type="button" onclick="switchTab('upi')" id="tabUpi"
+                style="flex:1; padding:8px; background:#f0f0f0; color:#333; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">UPI</button>
+      </div>
+
+      <!-- Card Fields -->
+      <div id="cardFields">
+        <div style="margin-bottom:14px;">
+          <label style="display:block; font-size:13px; font-weight:600; color:#333; margin-bottom:6px;">Card Number</label>
+          <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19"
+                 style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#333; margin-bottom:6px;">Expiry Date</label>
+            <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5"
+                   style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#333; margin-bottom:6px;">CVV</label>
+            <input type="password" id="cardCvv" placeholder="•••" maxlength="3"
+                   style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block; font-size:13px; font-weight:600; color:#333; margin-bottom:6px;">Name on Card</label>
+          <input type="text" id="cardName" placeholder="As printed on card"
+                 style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;">
+        </div>
+      </div>
+
+      <!-- UPI Fields -->
+      <div id="upiFields" style="display:none;">
+        <div style="margin-bottom:20px;">
+          <label style="display:block; font-size:13px; font-weight:600; color:#333; margin-bottom:6px;">UPI ID</label>
+          <input type="text" id="upiId" placeholder="yourname@upi"
+                 style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box;">
+          <small style="color:#888; font-size:12px;">e.g. 9876543210@paytm, name@gpay</small>
+        </div>
+      </div>
+
+      <div id="paymentError" style="color:#dc3545; font-size:13px; margin-bottom:12px; display:none;"></div>
+
+      <button type="button" onclick="processPayment()"
+              style="width:100%; padding:12px; background:#0a2a66; color:white; border:none; border-radius:8px; font-size:15px; font-weight:bold; cursor:pointer;">
+        Pay ₹{{ grand_total }}
+      </button>
+      <button type="button" onclick="closeModal()"
+              style="width:100%; padding:10px; background:none; color:#888; border:none; font-size:13px; cursor:pointer; margin-top:8px;">
+        Cancel
+      </button>
+    </div>
+
+    <!-- Processing Step -->
+    <div id="processingStep" style="display:none; text-align:center; padding:20px 0;">
+      <div style="font-size:48px; margin-bottom:16px; animation: spin 1s linear infinite; display:inline-block;">⏳</div>
+      <h3 style="color:#0a2a66; margin:0 0 8px 0;">Processing Payment...</h3>
+      <p style="color:#888; font-size:13px;">Please do not close this window</p>
+    </div>
+
+    <!-- Success Step -->
+    <div id="successStep" style="display:none; text-align:center; padding:20px 0;">
+      <div style="font-size:56px; margin-bottom:16px;">✅</div>
+      <h3 style="color:#28a745; margin:0 0 8px 0;">Payment Successful!</h3>
+      <p style="color:#666; font-size:14px; margin-bottom:20px;">Placing your order now...</p>
+    </div>
+
+  </div>
+</div>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+  <div class="footer-container">
+    <div class="footer-column">
+      <h4>About Trendify</h4>
+      <p><a href="{{ url_for('about') }}" style="color: inherit; text-decoration: none;">About Us</a></p>
+      <p><a href="{{ url_for('contact') }}" style="color: inherit; text-decoration: none;">Contact Us</a></p>
+      <p><a href="{{ url_for('careers') }}" style="color: inherit; text-decoration: none;">Careers</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Help</h4>
+      <p><a href="{{ url_for('payments') }}" style="color: inherit; text-decoration: none;">Payments</a></p>
+      <p><a href="{{ url_for('shipping') }}" style="color: inherit; text-decoration: none;">Shipping</a></p>
+      <p><a href="{{ url_for('returns') }}" style="color: inherit; text-decoration: none;">Returns</a></p>
+      <p><a href="{{ url_for('faq') }}" style="color: inherit; text-decoration: none;">FAQ</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Policies</h4>
+      <p><a href="{{ url_for('terms') }}" style="color: inherit; text-decoration: none;">Terms & Conditions</a></p>
+      <p><a href="{{ url_for('privacy') }}" style="color: inherit; text-decoration: none;">Privacy Policy</a></p>
+      <p><a href="{{ url_for('security') }}" style="color: inherit; text-decoration: none;">Security</a></p>
+    </div>
+    <div class="footer-column">
+      <h4>Contact</h4>
+      <p>Email: support@trendify.com</p>
+      <p>Phone: +91 9313665646</p>
+      <p>India</p>
+    </div>
+  </div>
+  <p class="footer-bottom">© 2026 Trendify Fashion | All Rights Reserved</p>
+</footer>
+
+<script>
+// Phone number validation
+document.getElementById('phoneInput').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+});
+
+// Pincode validation
+document.getElementById('pincodeInput').addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+});
+
+// Card number formatting
+document.getElementById('cardNumber').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 16);
+    this.value = v.replace(/(.{4})/g, '$1 ').trim();
+});
+
+// Expiry formatting
+document.getElementById('cardExpiry').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
+    this.value = v;
+});
+
+// CVV digits only
+document.getElementById('cardCvv').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '').slice(0, 3);
+});
+
+// Place Order button click
+document.getElementById('placeOrderBtn').addEventListener('click', function() {
+    const phone = document.getElementById('phoneInput').value;
+    const pincode = document.getElementById('pincodeInput').value;
+    const paymentMethod = document.querySelector('select[name="payment_method"]').value;
+
+    if (phone.length !== 10) { alert('Phone number must be exactly 10 digits!'); return; }
+    if (pincode.length !== 6) { alert('Pincode must be exactly 6 digits!'); return; }
+
+    // Check all required fields
+    const form = document.querySelector('form');
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+
+    if (paymentMethod === 'Online' || paymentMethod === 'Card') {
+        const formData = {
+            full_name: document.querySelector('input[name="full_name"]').value,
+            email: document.querySelector('input[name="email"]').value,
+            phone: phone,
+            address: document.querySelector('textarea[name="address"]').value,
+            city: document.querySelector('input[name="city"]').value,
+            state: document.querySelector('select[name="state"]').value,
+            pincode: pincode,
+            payment_method: paymentMethod,
+            amount: {{ grand_total }}
+        };
+
+        fetch('/create_payment', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(formData)
+        })
+        .then(r => r.json())
+        .then(data => {
+            const options = {
+                key: data.key,
+                amount: data.amount,
+                currency: 'INR',
+                name: 'Trendify Fashion',
+                description: 'Order Payment',
+                order_id: data.order_id,
+                prefill: {
+                    name: formData.full_name,
+                    email: formData.email,
+                    contact: formData.phone
+                },
+                theme: { color: '#0a2a66' },
+                handler: function(response) {
+                    fetch('/verify_payment', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(result => {
+                        if (result.success) {
+                            window.location.href = '/order_success/' + result.order_id;
+                        } else {
+                            alert('Payment verification failed. Please contact support.');
+                        }
+                    });
+                },
+                modal: { ondismiss: function() { alert('Payment cancelled.'); } }
+            };
+            const rzp = new Razorpay(options);
+            rzp.open();
+        });
+    } else {
+        // COD - submit directly
+        form.submit();
+    }
+});
+
+function switchTab(tab) {
+    if (tab === 'card') {
+        document.getElementById('cardFields').style.display = 'block';
+        document.getElementById('upiFields').style.display = 'none';
+        document.getElementById('tabCard').style.background = '#0a2a66';
+        document.getElementById('tabCard').style.color = 'white';
+        document.getElementById('tabUpi').style.background = '#f0f0f0';
+        document.getElementById('tabUpi').style.color = '#333';
+    } else {
+        document.getElementById('cardFields').style.display = 'none';
+        document.getElementById('upiFields').style.display = 'block';
+        document.getElementById('tabUpi').style.background = '#0a2a66';
+        document.getElementById('tabUpi').style.color = 'white';
+        document.getElementById('tabCard').style.background = '#f0f0f0';
+        document.getElementById('tabCard').style.color = '#333';
+    }
+}
+
+function closeModal() {
+    document.getElementById('paymentModal').style.display = 'none';
+}
+
+function processPayment() {
+    const isCard = document.getElementById('cardFields').style.display !== 'none';
+    const errEl = document.getElementById('paymentError');
+    errEl.style.display = 'none';
+
+    if (isCard) {
+        const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
+        const exp = document.getElementById('cardExpiry').value;
+        const cvv = document.getElementById('cardCvv').value;
+        const name = document.getElementById('cardName').value.trim();
+        if (num.length !== 16) { errEl.textContent = 'Enter a valid 16-digit card number.'; errEl.style.display = 'block'; return; }
+        if (!/^\d{2}\/\d{2}$/.test(exp)) { errEl.textContent = 'Enter expiry in MM/YY format.'; errEl.style.display = 'block'; return; }
+        if (cvv.length !== 3) { errEl.textContent = 'Enter a valid 3-digit CVV.'; errEl.style.display = 'block'; return; }
+        if (!name) { errEl.textContent = 'Enter name on card.'; errEl.style.display = 'block'; return; }
+    } else {
+        const upi = document.getElementById('upiId').value.trim();
+        if (!upi.includes('@')) { errEl.textContent = 'Enter a valid UPI ID (e.g. name@gpay).'; errEl.style.display = 'block'; return; }
+    }
+
+    // Show processing
+    document.getElementById('paymentFormStep').style.display = 'none';
+    document.getElementById('processingStep').style.display = 'block';
+
+    // After 2.5s show success, then submit form
+    setTimeout(function() {
+        document.getElementById('processingStep').style.display = 'none';
+        document.getElementById('successStep').style.display = 'block';
+        setTimeout(function() {
+            document.querySelector('form').submit();
+        }, 1500);
+    }, 2500);
+}
+</script>
+
+</body>
+</html>
